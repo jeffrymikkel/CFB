@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB This Week</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card-bg: #ffffff;
+    --border: #e2e4e8;
+    --text: #1a1a1a;
+    --text-muted: #666666;
+    --accent: #1a5fb4;
+    --accent-hover: #144a8f;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    transition: background 0.15s ease;
+  }
+
+  button:hover {
+    background: #f0f1f3;
+  }
+
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  button.primary:hover {
+    background: var(--accent-hover);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  #status-message {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  #status-message.error {
+    color: #b3261e;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  #game-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  @media (min-width: 640px) {
+    #game-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1000px) {
+    #game-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .game-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 14px;
+    position: relative;
+  }
+
+  .game-card.hidden {
+    display: none;
+  }
+
+  .team-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+  }
+
+  .team-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .team-logo.placeholder {
+    background: var(--bg);
+    border-radius: 50%;
+  }
+
+  .team-name {
+    font-size: 15px;
+    font-weight: 600;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mark-toggle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    font-size: 16px;
+    line-height: 1;
+    color: #ccc;
+    padding: 0;
+  }
+
+  .mark-toggle.marked {
+    color: #f5a623;
+    border-color: #f5a623;
+    background: #fff8ea;
+  }
+
+  .game-meta {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .game-meta span + span::before {
+    content: "\00b7";
+    margin: 0 6px;
+    color: var(--border);
+  }
+
+  #empty-message {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CFB This Week</h1>
+  <div class="header-actions">
+    <button id="refresh-btn" title="Refresh games">&#8635; Refresh</button>
+    <button id="filter-btn" class="primary">Show Marked Only</button>
+  </div>
+</header>
+
+<main>
+  <div id="status-message"></div>
+  <div id="empty-message" style="display:none;">No games marked yet.</div>
+  <div id="game-grid"></div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var API_URL = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?limit=100';
+
+  // Confirmed against the live ESPN response: team.conferenceId values for the four Power conferences.
+  var P4_CONFERENCE_IDS = ['1', '4', '5', '8']; // ACC, Big 12, Big Ten, SEC
+  var NOTRE_DAME_ID = '87';
+
+  var statusEl = document.getElementById('status-message');
+  var emptyEl = document.getElementById('empty-message');
+  var gridEl = document.getElementById('game-grid');
+  var refreshBtn = document.getElementById('refresh-btn');
+  var filterBtn = document.getElementById('filter-btn');
+
+  var currentGames = [];
+  var filterActive = localStorage.getItem('filterActive') === 'true';
+
+  function setStatus(html, isError) {
+    statusEl.style.display = html ? '' : 'none';
+    statusEl.className = isError ? 'error' : '';
+    statusEl.innerHTML = html || '';
+  }
+
+  function isP4orND(team) {
+    if (!team) return false;
+    if (String(team.id) === NOTRE_DAME_ID) return true;
+    if (team.displayName && team.displayName.indexOf('Notre Dame') !== -1) return true;
+    if (team.conferenceId && P4_CONFERENCE_IDS.indexOf(String(team.conferenceId)) !== -1) return true;
+    return false;
+  }
+
+  function formatKickoff(isoString) {
+    try {
+      var d = new Date(isoString);
+      var weekday = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Chicago',
+        weekday: 'short'
+      }).format(d);
+      var time = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Chicago',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }).format(d);
+      return weekday + ' ' + time + ' CT';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function getSpreadDisplay(competition) {
+    var odds = competition.odds;
+    if (!odds || !odds.length || !odds[0]) return 'Line TBD';
+    var o = odds[0];
+    if (typeof o.spread === 'number' && o.spread === 0) return 'PK';
+    if (o.details) return o.details;
+    return 'Line TBD';
+  }
+
+  function extractGame(event) {
+    try {
+      var competition = event.competitions && event.competitions[0];
+      if (!competition) return null;
+      var competitors = competition.competitors;
+      if (!competitors || competitors.length < 2) return null;
+
+      var away = null, home = null;
+      for (var i = 0; i < competitors.length; i++) {
+        if (competitors[i].homeAway === 'away') away = competitors[i];
+        if (competitors[i].homeAway === 'home') home = competitors[i];
+      }
+      if (!away || !home) return null;
+
+      var qualifies = isP4orND(away.team) || isP4orND(home.team);
+      if (!qualifies) return null;
+
+      var network = null;
+      if (competition.broadcasts && competition.broadcasts.length && competition.broadcasts[0].names && competition.broadcasts[0].names.length) {
+        network = competition.broadcasts[0].names.join('/');
+      }
+
+      return {
+        eventId: event.id,
+        date: event.date,
+        awayName: away.team.displayName || away.team.name || 'Away',
+        awayLogo: away.team.logo || null,
+        homeName: home.team.displayName || home.team.name || 'Home',
+        homeLogo: home.team.logo || null,
+        network: network,
+        spread: getSpreadDisplay(competition)
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function isMarked(eventId) {
+    return localStorage.getItem('interested_' + eventId) === 'true';
+  }
+
+  function setMarked(eventId, marked) {
+    if (marked) {
+      localStorage.setItem('interested_' + eventId, 'true');
+    } else {
+      localStorage.removeItem('interested_' + eventId);
+    }
+  }
+
+  function renderGrid() {
+    gridEl.innerHTML = '';
+
+    if (!currentGames.length) {
+      return;
+    }
+
+    var anyVisible = false;
+
+    currentGames.forEach(function (game) {
+      var marked = isMarked(game.eventId);
+      if (filterActive && !marked) return;
+      anyVisible = true;
+
+      var card = document.createElement('div');
+      card.className = 'game-card';
+
+      var markBtn = document.createElement('button');
+      markBtn.className = 'mark-toggle' + (marked ? ' marked' : '');
+      markBtn.setAttribute('aria-label', 'Mark game as interested');
+      markBtn.innerHTML = marked ? '&#9733;' : '&#9734;';
+      markBtn.addEventListener('click', function () {
+        var nowMarked = !isMarked(game.eventId);
+        setMarked(game.eventId, nowMarked);
+        renderGrid();
+      });
+      card.appendChild(markBtn);
+
+      card.appendChild(buildTeamRow(game.awayLogo, game.awayName));
+      card.appendChild(buildTeamRow(game.homeLogo, game.homeName));
+
+      var meta = document.createElement('div');
+      meta.className = 'game-meta';
+
+      var timeSpan = document.createElement('span');
+      timeSpan.textContent = formatKickoff(game.date) || 'Time TBD';
+      meta.appendChild(timeSpan);
+
+      if (game.network) {
+        var netSpan = document.createElement('span');
+        netSpan.textContent = game.network;
+        meta.appendChild(netSpan);
+      }
+
+      var spreadSpan = document.createElement('span');
+      spreadSpan.textContent = game.spread;
+      meta.appendChild(spreadSpan);
+
+      card.appendChild(meta);
+      gridEl.appendChild(card);
+    });
+
+    emptyEl.style.display = (filterActive && !anyVisible) ? '' : 'none';
+  }
+
+  function buildTeamRow(logoUrl, name) {
+    var row = document.createElement('div');
+    row.className = 'team-row';
+
+    var img = document.createElement('img');
+    img.className = 'team-logo';
+    img.alt = '';
+    if (logoUrl) {
+      img.src = logoUrl;
+      img.onerror = function () {
+        this.style.visibility = 'hidden';
+      };
+    } else {
+      img.className += ' placeholder';
+    }
+    row.appendChild(img);
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'team-name';
+    nameEl.textContent = name;
+    row.appendChild(nameEl);
+
+    return row;
+  }
+
+  function updateFilterButton() {
+    filterBtn.textContent = filterActive ? 'Show All Games' : 'Show Marked Only';
+  }
+
+  function loadGames() {
+    setStatus('<span class="spinner"></span>Loading games...', false);
+    gridEl.innerHTML = '';
+    emptyEl.style.display = 'none';
+    refreshBtn.disabled = true;
+
+    fetch(API_URL)
+      .then(function (res) {
+        if (!res.ok) throw new Error('Request failed with status ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        var events = data.events || [];
+        var games = events
+          .map(extractGame)
+          .filter(function (g) { return g !== null; });
+
+        games.sort(function (a, b) {
+          return new Date(a.date) - new Date(b.date);
+        });
+
+        currentGames = games;
+        setStatus('', false);
+        renderGrid();
+      })
+      .catch(function (err) {
+        currentGames = [];
+        gridEl.innerHTML = '';
+        emptyEl.style.display = 'none';
+        setStatus('Couldn\'t load games right now. Check your connection and try refreshing.', true);
+      })
+      .finally(function () {
+        refreshBtn.disabled = false;
+      });
+  }
+
+  refreshBtn.addEventListener('click', loadGames);
+
+  filterBtn.addEventListener('click', function () {
+    filterActive = !filterActive;
+    localStorage.setItem('filterActive', filterActive ? 'true' : 'false');
+    updateFilterButton();
+    renderGrid();
+  });
+
+  updateFilterButton();
+  loadGames();
+})();
+</script>
+
+</body>
+</html>
