@@ -226,6 +226,126 @@
     color: var(--text-muted);
     font-size: 15px;
   }
+
+  /* Timeline view */
+  .timeline-toggle-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .timeline-toggle-row button.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .timeline-container {
+    display: flex;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .timeline-labels {
+    flex-shrink: 0;
+    width: 72px;
+    border-right: 1px solid var(--border);
+  }
+
+  .timeline-label-spacer {
+    height: 36px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+  }
+
+  .timeline-label-row {
+    height: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    line-height: 1.4;
+    padding: 2px;
+    text-align: center;
+  }
+
+  .timeline-scroll-area {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .timeline-axis {
+    position: relative;
+    height: 36px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+  }
+
+  .timeline-axis-label {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    padding-left: 4px;
+    border-left: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .timeline-rows {
+    position: relative;
+  }
+
+  .timeline-row {
+    position: relative;
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .timeline-row:last-child {
+    border-bottom: none;
+  }
+
+  .timeline-block {
+    position: absolute;
+    top: 6px;
+    height: 40px;
+    background: #f4f5f7;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+  }
+
+  .timeline-block.marked {
+    background: #eef4fd;
+    border-left: 3px solid var(--accent);
+  }
+
+  .timeline-block img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  #timeline-empty-message {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
 </style>
 </head>
 <body>
@@ -235,13 +355,26 @@
   <div class="header-actions">
     <button id="refresh-btn" title="Refresh games">&#8635; Refresh</button>
     <button id="filter-btn" class="primary">Show Marked Only</button>
+    <button id="view-toggle-btn">Timeline View</button>
   </div>
 </header>
 
 <main>
   <div id="status-message"></div>
-  <div id="empty-message" style="display:none;">No games marked yet.</div>
-  <div id="game-grid"></div>
+
+  <div id="card-view">
+    <div id="empty-message" style="display:none;">No games marked yet.</div>
+    <div id="game-grid"></div>
+  </div>
+
+  <div id="timeline-view" style="display:none;">
+    <div class="timeline-toggle-row">
+      <button id="timeline-all-btn">All Games</button>
+      <button id="timeline-marked-btn">Marked Only</button>
+    </div>
+    <div id="timeline-empty-message" style="display:none;">No games marked yet.</div>
+    <div id="timeline-container-wrap"></div>
+  </div>
 </main>
 
 <script>
@@ -259,9 +392,18 @@
   var gridEl = document.getElementById('game-grid');
   var refreshBtn = document.getElementById('refresh-btn');
   var filterBtn = document.getElementById('filter-btn');
+  var viewToggleBtn = document.getElementById('view-toggle-btn');
+  var cardViewEl = document.getElementById('card-view');
+  var timelineViewEl = document.getElementById('timeline-view');
+  var timelineAllBtn = document.getElementById('timeline-all-btn');
+  var timelineMarkedBtn = document.getElementById('timeline-marked-btn');
+  var timelineEmptyEl = document.getElementById('timeline-empty-message');
+  var timelineWrapEl = document.getElementById('timeline-container-wrap');
 
   var currentGames = [];
   var filterActive = localStorage.getItem('filterActive') === 'true';
+  var activeView = localStorage.getItem('activeView') === 'timeline' ? 'timeline' : 'card';
+  var timelineFilter = localStorage.getItem('timelineFilter') === 'marked' ? 'marked' : 'all';
 
   function setStatus(html, isError) {
     statusEl.style.display = html ? '' : 'none';
@@ -331,8 +473,10 @@
         eventId: event.id,
         date: event.date,
         awayName: away.team.displayName || away.team.name || 'Away',
+        awayAbbr: away.team.abbreviation || away.team.shortDisplayName || 'AWAY',
         awayLogo: away.team.logo || null,
         homeName: home.team.displayName || home.team.name || 'Home',
+        homeAbbr: home.team.abbreviation || home.team.shortDisplayName || 'HOME',
         homeLogo: home.team.logo || null,
         network: network,
         spread: getSpreadDisplay(competition)
@@ -379,6 +523,7 @@
         var nowMarked = !isMarked(game.eventId);
         setMarked(game.eventId, nowMarked);
         renderGrid();
+        renderTimeline();
       });
       card.appendChild(markBtn);
 
@@ -438,6 +583,122 @@
     filterBtn.textContent = filterActive ? 'Show All Games' : 'Show Marked Only';
   }
 
+  function updateViewToggleButton() {
+    viewToggleBtn.textContent = activeView === 'timeline' ? 'Card View' : 'Timeline View';
+    cardViewEl.style.display = activeView === 'timeline' ? 'none' : '';
+    timelineViewEl.style.display = activeView === 'timeline' ? '' : 'none';
+    filterBtn.style.display = activeView === 'timeline' ? 'none' : '';
+  }
+
+  function updateTimelineFilterButtons() {
+    timelineAllBtn.className = timelineFilter === 'all' ? 'active' : '';
+    timelineMarkedBtn.className = timelineFilter === 'marked' ? 'active' : '';
+  }
+
+  function formatAxisHourLabel(date) {
+    var s = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      hour: 'numeric',
+      hour12: true
+    }).format(date);
+    return s.replace(/\s+/g, '').toLowerCase();
+  }
+
+  function renderTimeline() {
+    var TIMELINE_SCALE = 2; // px per minute
+    var GAME_DURATION_MIN = 240; // assume every game runs 4 hours
+
+    timelineWrapEl.innerHTML = '';
+
+    var games = currentGames.filter(function (g) {
+      return timelineFilter === 'marked' ? isMarked(g.eventId) : true;
+    });
+
+    if (!games.length) {
+      timelineEmptyEl.textContent = timelineFilter === 'marked' ? 'No games marked yet.' : 'No games to show.';
+      timelineEmptyEl.style.display = '';
+      return;
+    }
+    timelineEmptyEl.style.display = 'none';
+
+    var kickoffs = games.map(function (g) { return new Date(g.date).getTime(); });
+    var earliest = Math.min.apply(null, kickoffs);
+    var latest = Math.max.apply(null, kickoffs);
+
+    var HOUR_MS = 3600000;
+    // America/Chicago is always a whole-hour offset from UTC, so flooring/ceiling
+    // epoch ms to the hour also floors/ceils the Central-Time wall clock hour.
+    var timelineStartMs = Math.floor(earliest / HOUR_MS) * HOUR_MS;
+    var timelineEndMs = Math.ceil((latest + GAME_DURATION_MIN * 60000) / HOUR_MS) * HOUR_MS;
+    var totalMinutes = (timelineEndMs - timelineStartMs) / 60000;
+    var totalWidth = totalMinutes * TIMELINE_SCALE;
+
+    var container = document.createElement('div');
+    container.className = 'timeline-container';
+
+    var labelsCol = document.createElement('div');
+    labelsCol.className = 'timeline-labels';
+    var labelSpacer = document.createElement('div');
+    labelSpacer.className = 'timeline-label-spacer';
+    labelsCol.appendChild(labelSpacer);
+
+    var scrollArea = document.createElement('div');
+    scrollArea.className = 'timeline-scroll-area';
+
+    var axis = document.createElement('div');
+    axis.className = 'timeline-axis';
+    axis.style.width = totalWidth + 'px';
+
+    for (var ms = timelineStartMs; ms <= timelineEndMs; ms += HOUR_MS) {
+      var labelDiv = document.createElement('div');
+      labelDiv.className = 'timeline-axis-label';
+      labelDiv.style.left = ((ms - timelineStartMs) / 60000 * TIMELINE_SCALE) + 'px';
+      labelDiv.textContent = formatAxisHourLabel(new Date(ms));
+      axis.appendChild(labelDiv);
+    }
+
+    var rows = document.createElement('div');
+    rows.className = 'timeline-rows';
+    rows.style.width = totalWidth + 'px';
+
+    games.forEach(function (game) {
+      var labelRow = document.createElement('div');
+      labelRow.className = 'timeline-label-row';
+      labelRow.innerHTML = game.awayAbbr + '<br>@ ' + game.homeAbbr;
+      labelsCol.appendChild(labelRow);
+
+      var row = document.createElement('div');
+      row.className = 'timeline-row';
+
+      var marked = isMarked(game.eventId);
+      var block = document.createElement('div');
+      block.className = 'timeline-block' + (marked ? ' marked' : '');
+      var kickoffMs = new Date(game.date).getTime();
+      var leftPx = (kickoffMs - timelineStartMs) / 60000 * TIMELINE_SCALE;
+      block.style.left = leftPx + 'px';
+      block.style.width = (GAME_DURATION_MIN * TIMELINE_SCALE) + 'px';
+
+      var awayImg = document.createElement('img');
+      awayImg.alt = game.awayAbbr;
+      if (game.awayLogo) awayImg.src = game.awayLogo;
+      block.appendChild(awayImg);
+
+      var homeImg = document.createElement('img');
+      homeImg.alt = game.homeAbbr;
+      if (game.homeLogo) homeImg.src = game.homeLogo;
+      block.appendChild(homeImg);
+
+      row.appendChild(block);
+      rows.appendChild(row);
+    });
+
+    scrollArea.appendChild(axis);
+    scrollArea.appendChild(rows);
+    container.appendChild(labelsCol);
+    container.appendChild(scrollArea);
+    timelineWrapEl.appendChild(container);
+  }
+
   function loadGames() {
     setStatus('<span class="spinner"></span>Loading games...', false);
     gridEl.innerHTML = '';
@@ -462,11 +723,14 @@
         currentGames = games;
         setStatus('', false);
         renderGrid();
+        renderTimeline();
       })
       .catch(function (err) {
         currentGames = [];
         gridEl.innerHTML = '';
         emptyEl.style.display = 'none';
+        timelineWrapEl.innerHTML = '';
+        timelineEmptyEl.style.display = 'none';
         setStatus('Couldn\'t load games right now. Check your connection and try refreshing.', true);
       })
       .finally(function () {
@@ -483,7 +747,30 @@
     renderGrid();
   });
 
+  viewToggleBtn.addEventListener('click', function () {
+    activeView = activeView === 'timeline' ? 'card' : 'timeline';
+    localStorage.setItem('activeView', activeView);
+    updateViewToggleButton();
+    if (activeView === 'timeline') renderTimeline();
+  });
+
+  timelineAllBtn.addEventListener('click', function () {
+    timelineFilter = 'all';
+    localStorage.setItem('timelineFilter', timelineFilter);
+    updateTimelineFilterButtons();
+    renderTimeline();
+  });
+
+  timelineMarkedBtn.addEventListener('click', function () {
+    timelineFilter = 'marked';
+    localStorage.setItem('timelineFilter', timelineFilter);
+    updateTimelineFilterButtons();
+    renderTimeline();
+  });
+
   updateFilterButton();
+  updateViewToggleButton();
+  updateTimelineFilterButtons();
   loadGames();
 })();
 </script>
