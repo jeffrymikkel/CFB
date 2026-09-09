@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>CFB This Week</title>
 <style>
   :root {
@@ -34,29 +34,6 @@
     background: var(--card-bg);
   }
 
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  header::-webkit-scrollbar {
-    display: none;
-  }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
   button {
     font: inherit;
     cursor: pointer;
@@ -67,43 +44,50 @@
     transition: background 0.15s ease, opacity 0.15s ease;
   }
 
-  .view-btn {
-    flex-shrink: 0;
-    background: transparent;
-    padding: 8px 14px;
-    font-size: 14px;
-    font-weight: 700;
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
   }
 
-  .view-btn.active {
+  #top-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+    border-bottom: 1px solid var(--border);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  #top-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-btn {
+    flex-shrink: 0;
+    background: transparent;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .nav-btn.active {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
   }
 
-  .view-btn:hover:not(.active) {
+  .nav-btn:hover:not(.active):not(:disabled) {
     background: #f0f1f3;
   }
 
-  .filter-btn-sm {
-    flex-shrink: 0;
-    background: transparent;
-    color: var(--text-muted);
-    padding: 5px 9px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .filter-btn-sm.active {
-    background: var(--bg);
-    color: var(--text);
-    border-color: var(--text);
-    font-weight: 700;
-  }
-
-  .filter-btn-sm:disabled {
-    opacity: 0.4;
+  .nav-btn:disabled {
+    opacity: 0.35;
     cursor: default;
+    pointer-events: none;
   }
 
   #week-strip {
@@ -147,18 +131,14 @@
   }
 
   @media (max-width: 480px) {
-    header {
-      padding: 10px 12px;
+    #top-nav {
+      padding: 8px 10px;
+      padding-top: calc(8px + env(safe-area-inset-top));
     }
 
-    .view-btn {
-      padding: 6px 10px;
-      font-size: 13px;
-    }
-
-    .filter-btn-sm {
-      padding: 4px 7px;
-      font-size: 11px;
+    .nav-btn {
+      padding: 6px 9px;
+      font-size: 12px;
     }
 
     #week-strip {
@@ -326,7 +306,7 @@
     font-size: 15px;
   }
 
-  /* Timeline view */
+  /* Timeline view (CFB Timeline + NFL Timeline) */
   #timeline-list {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -362,8 +342,17 @@
     border-top: 1px solid var(--border);
   }
 
+  .timeline-row-label {
+    flex: 0 0 72px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    line-height: 1.3;
+    padding-top: 6px;
+  }
+
   .timeline-time {
-    flex: 0 0 80px;
+    flex: 0 0 76px;
     font-size: 13px;
     font-weight: 700;
     color: var(--text-muted);
@@ -407,19 +396,136 @@
     color: var(--text-muted);
     font-size: 15px;
   }
+
+  /* Hamburger menu overlay */
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .menu-panel {
+    width: min(340px, 88vw);
+    height: 100%;
+    background: var(--card-bg);
+    box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    padding: 16px;
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
+
+  .menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .menu-header h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .menu-close {
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    line-height: 1;
+    padding: 4px 8px;
+    color: var(--text-muted);
+  }
+
+  #menu-nfl-note {
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .menu-section {
+    margin-bottom: 20px;
+  }
+
+  .menu-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+  }
+
+  .menu-conf-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin: 12px 0 4px;
+  }
+
+  .menu-conf-group-title:first-child {
+    margin-top: 0;
+  }
+
+  .menu-team-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .menu-team-name {
+    font-size: 14px;
+  }
+
+  .menu-team-star {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 6px;
+    color: #ccc;
+  }
+
+  .menu-team-star.active {
+    color: #f5a623;
+  }
+
+  .menu-rank-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .menu-rank-btn {
+    background: transparent;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .menu-rank-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
 </style>
 </head>
 <body>
 
 <div class="top-bar">
-  <header>
-    <div class="header-left">
-      <button id="card-view-btn" class="view-btn active">Card View</button>
-      <button id="filter-all-btn" class="filter-btn-sm active">All Games</button>
-      <button id="filter-starred-btn" class="filter-btn-sm">&#9733;</button>
-    </div>
-    <button id="timeline-view-btn" class="view-btn">Timeline View</button>
-  </header>
+  <nav id="top-nav">
+    <button id="nav-cfb-home" class="nav-btn active">CFB Home</button>
+    <button id="nav-cfb-starred" class="nav-btn">&#9733;</button>
+    <button id="nav-cfb-timeline" class="nav-btn">CFB Timeline</button>
+    <button id="nav-nfl-timeline" class="nav-btn">NFL Timeline</button>
+    <button id="nav-menu" class="nav-btn">&#9776;</button>
+  </nav>
   <div id="week-strip"></div>
 </div>
 
@@ -432,18 +538,37 @@
   </div>
 
   <div id="timeline-view" style="display:none;">
-    <div id="timeline-empty-message" style="display:none;">Star some games in Card View to see them here.</div>
+    <div id="timeline-empty-message" style="display:none;"></div>
     <div id="timeline-list"></div>
   </div>
 </main>
+
+<div id="menu-overlay" class="menu-overlay" style="display:none;">
+  <div class="menu-panel">
+    <div class="menu-header">
+      <h2>Preferences</h2>
+      <button id="menu-close-btn" class="menu-close" aria-label="Close menu">&times;</button>
+    </div>
+    <div id="menu-nfl-note" style="display:none;">Team preferences apply to CFB only.</div>
+    <div class="menu-section">
+      <div class="menu-section-title">Teams</div>
+      <div id="menu-team-list"></div>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Auto-star ranked teams:</div>
+      <div id="menu-rank-options"></div>
+    </div>
+  </div>
+</div>
 
 <script>
 (function () {
   'use strict';
 
-  var API_BASE = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard';
+  var CFB_API = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard';
+  var NFL_API = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
 
-  // Confirmed against the live ESPN response: team.conferenceId values for the four Power conferences.
+  // Confirmed against live ESPN responses: team.conferenceId values for the four Power conferences.
   var P4_CONFERENCE_IDS = ['1', '4', '5', '8']; // ACC, Big 12, Big Ten, SEC
   var NOTRE_DAME_ID = '87';
 
@@ -451,24 +576,84 @@
   // ESPN attaches to P4 title games while both teams are still TBD.
   var P4_CHAMPIONSHIP_HEADLINES = ['ACC Championship', 'Big 12 Championship', 'Big Ten Championship', 'SEC Championship'];
 
+  var RANK_OPTIONS = [5, 10, 15, 20, 25];
+
+  // Oregon, Washington, Ohio State, Texas, Alabama, LSU, BYU, Utah, Clemson --
+  // IDs confirmed against live ESPN scoreboard data this session.
+  var DEFAULT_STARRED_TEAM_IDS = ['2483', '264', '194', '251', '333', '99', '252', '254', '228'];
+
+  // P4 + Notre Dame roster for the hamburger menu. IDs cross-checked against live
+  // ESPN scoreboard data where those teams appeared in games fetched this session.
+  var P4_ND_TEAMS = [
+    { conf: 'ACC', teams: [
+      ['103', 'Boston College'], ['25', 'California'], ['228', 'Clemson'], ['150', 'Duke'],
+      ['52', 'Florida State'], ['59', 'Georgia Tech'], ['97', 'Louisville'], ['2390', 'Miami'],
+      ['152', 'NC State'], ['153', 'North Carolina'], ['221', 'Pittsburgh'], ['2567', 'SMU'],
+      ['24', 'Stanford'], ['183', 'Syracuse'], ['258', 'Virginia'], ['259', 'Virginia Tech'], ['154', 'Wake Forest']
+    ]},
+    { conf: 'Big Ten', teams: [
+      ['356', 'Illinois'], ['84', 'Indiana'], ['2294', 'Iowa'], ['120', 'Maryland'],
+      ['130', 'Michigan'], ['127', 'Michigan State'], ['135', 'Minnesota'], ['158', 'Nebraska'],
+      ['77', 'Northwestern'], ['194', 'Ohio State'], ['2483', 'Oregon'], ['213', 'Penn State'],
+      ['2509', 'Purdue'], ['164', 'Rutgers'], ['26', 'UCLA'], ['30', 'USC'], ['264', 'Washington'], ['275', 'Wisconsin']
+    ]},
+    { conf: 'Big 12', teams: [
+      ['12', 'Arizona'], ['9', 'Arizona State'], ['239', 'Baylor'], ['252', 'BYU'],
+      ['2132', 'Cincinnati'], ['38', 'Colorado'], ['248', 'Houston'], ['66', 'Iowa State'],
+      ['2305', 'Kansas'], ['2306', 'Kansas State'], ['197', 'Oklahoma State'], ['2628', 'TCU'],
+      ['2641', 'Texas Tech'], ['2116', 'UCF'], ['254', 'Utah'], ['277', 'West Virginia']
+    ]},
+    { conf: 'SEC', teams: [
+      ['333', 'Alabama'], ['8', 'Arkansas'], ['2', 'Auburn'], ['57', 'Florida'],
+      ['61', 'Georgia'], ['96', 'Kentucky'], ['99', 'LSU'], ['344', 'Mississippi State'],
+      ['142', 'Missouri'], ['145', 'Ole Miss'], ['201', 'Oklahoma'], ['2579', 'South Carolina'],
+      ['2633', 'Tennessee'], ['251', 'Texas'], ['245', 'Texas A&M'], ['238', 'Vanderbilt']
+    ]},
+    { conf: 'Independent', teams: [
+      ['87', 'Notre Dame']
+    ]}
+  ];
+
+  // ---- DOM refs ----
   var statusEl = document.getElementById('status-message');
   var emptyEl = document.getElementById('empty-message');
   var gridEl = document.getElementById('game-grid');
-  var cardViewBtn = document.getElementById('card-view-btn');
-  var timelineViewBtn = document.getElementById('timeline-view-btn');
-  var filterAllBtn = document.getElementById('filter-all-btn');
-  var filterStarredBtn = document.getElementById('filter-starred-btn');
-  var weekStripEl = document.getElementById('week-strip');
   var cardViewEl = document.getElementById('card-view');
   var timelineViewEl = document.getElementById('timeline-view');
   var timelineEmptyEl = document.getElementById('timeline-empty-message');
   var timelineListEl = document.getElementById('timeline-list');
+  var weekStripEl = document.getElementById('week-strip');
 
-  var currentGames = [];
-  var weekTabs = [];
-  var selectedTabIndex = -1;
-  var activeView = localStorage.getItem('activeView') === 'timeline' ? 'timeline' : 'card';
-  var cardFilter = localStorage.getItem('cardFilter') === 'starred' ? 'starred' : 'all';
+  var navBtns = {
+    'cfb-home': document.getElementById('nav-cfb-home'),
+    'cfb-starred': document.getElementById('nav-cfb-starred'),
+    'cfb-timeline': document.getElementById('nav-cfb-timeline'),
+    'nfl-timeline': document.getElementById('nav-nfl-timeline')
+  };
+  var menuBtn = document.getElementById('nav-menu');
+  var menuOverlay = document.getElementById('menu-overlay');
+  var menuCloseBtn = document.getElementById('menu-close-btn');
+  var menuNflNote = document.getElementById('menu-nfl-note');
+  var menuTeamListEl = document.getElementById('menu-team-list');
+  var menuRankOptionsEl = document.getElementById('menu-rank-options');
+
+  // ---- State ----
+  var cfbGames = [];
+  var nflGames = [];
+  var cfbWeekTabs = [];
+  var nflWeekTabs = [];
+  var selectedCfbIdx = -1;
+  var selectedNflIdx = -1;
+  var nflLoaded = false;
+
+  var activeView = (function () {
+    var v = localStorage.getItem('activeView');
+    return ['cfb-home', 'cfb-starred', 'cfb-timeline', 'nfl-timeline'].indexOf(v) !== -1 ? v : 'cfb-home';
+  })();
+
+  function isNflView() { return activeView === 'nfl-timeline'; }
+  function isCfbTimelineView() { return activeView === 'cfb-timeline'; }
+  function isCardView() { return activeView === 'cfb-home' || activeView === 'cfb-starred'; }
 
   function setStatus(html, isError) {
     statusEl.style.display = html ? '' : 'none';
@@ -476,6 +661,64 @@
     statusEl.innerHTML = html || '';
   }
 
+  // ---- Menu preferences ----
+  function getMenuStarredTeamIds() {
+    var raw = localStorage.getItem('menuStarredTeams');
+    if (raw) {
+      try {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
+    return DEFAULT_STARRED_TEAM_IDS.slice();
+  }
+
+  function setMenuStarredTeamIds(ids) {
+    localStorage.setItem('menuStarredTeams', JSON.stringify(ids));
+  }
+
+  function getRankingThreshold() {
+    var v = parseInt(localStorage.getItem('rankingThreshold'), 10);
+    return RANK_OPTIONS.indexOf(v) !== -1 ? v : 15;
+  }
+
+  function setRankingThreshold(v) {
+    localStorage.setItem('rankingThreshold', String(v));
+  }
+
+  // ---- Star state ----
+  function isMarked(eventId) {
+    return localStorage.getItem('interested_' + eventId) === 'true';
+  }
+
+  function isManuallyUnstarred(eventId) {
+    return localStorage.getItem('manuallyUnstarred_' + eventId) === 'true';
+  }
+
+  function manualStar(eventId, marked) {
+    if (marked) {
+      localStorage.setItem('interested_' + eventId, 'true');
+      localStorage.removeItem('manuallyUnstarred_' + eventId);
+    } else {
+      localStorage.removeItem('interested_' + eventId);
+      localStorage.setItem('manuallyUnstarred_' + eventId, 'true');
+    }
+  }
+
+  function runAutoStar(games) {
+    var menuIds = getMenuStarredTeamIds();
+    var threshold = getRankingThreshold();
+    games.forEach(function (g) {
+      if (isManuallyUnstarred(g.eventId)) return;
+      var awayMatch = (g.awayTeamId && menuIds.indexOf(g.awayTeamId) !== -1) || (g.awayRank !== null && g.awayRank <= threshold);
+      var homeMatch = (g.homeTeamId && menuIds.indexOf(g.homeTeamId) !== -1) || (g.homeRank !== null && g.homeRank <= threshold);
+      if (awayMatch || homeMatch) {
+        localStorage.setItem('interested_' + g.eventId, 'true');
+      }
+    });
+  }
+
+  // ---- P4 + Notre Dame filtering (CFB only) ----
   function isP4orND(team) {
     if (!team) return false;
     if (String(team.id) === NOTRE_DAME_ID) return true;
@@ -490,8 +733,6 @@
 
   function qualifiesForP4Filter(awayTeam, homeTeam, notes) {
     if (isP4orND(awayTeam) || isP4orND(homeTeam)) return true;
-    // Neither team has resolved yet (conf championship / CFP not yet bracketed) -- fall
-    // back to the game's note headline, which names the specific championship/bracket.
     for (var i = 0; i < notes.length; i++) {
       var headline = notes[i].headline || '';
       if (P4_CHAMPIONSHIP_HEADLINES.indexOf(headline) !== -1) return true;
@@ -500,19 +741,12 @@
     return false;
   }
 
+  // ---- Formatting ----
   function formatKickoff(isoString) {
     try {
       var d = new Date(isoString);
-      var weekday = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/Chicago',
-        weekday: 'short'
-      }).format(d);
-      var time = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/Chicago',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      }).format(d);
+      var weekday = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short' }).format(d);
+      var time = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit', hour12: true }).format(d);
       return weekday + ' ' + time + ' CT';
     } catch (e) {
       return '';
@@ -528,7 +762,8 @@
     return 'Line TBD';
   }
 
-  function extractGame(event) {
+  // ---- Extraction (shared by CFB and NFL) ----
+  function extractGame(event, sport) {
     try {
       var competition = event.competitions && event.competitions[0];
       if (!competition) return null;
@@ -543,7 +778,7 @@
       if (!away || !home) return null;
 
       var notes = competition.notes || [];
-      if (!qualifiesForP4Filter(away.team, home.team, notes)) return null;
+      if (sport === 'cfb' && !qualifiesForP4Filter(away.team, home.team, notes)) return null;
 
       var network = null;
       if (competition.broadcasts && competition.broadcasts.length && competition.broadcasts[0].names && competition.broadcasts[0].names.length) {
@@ -551,17 +786,26 @@
       }
 
       var statusType = (competition.status && competition.status.type) || {};
-      var isFinal = !!statusType.completed;
+      var state = statusType.state || 'pre';
+      var isFinal = state === 'post';
 
       var awayTbd = isTbdTeam(away.team);
       var homeTbd = isTbdTeam(home.team);
 
+      var awayRank = (away.curatedRank && typeof away.curatedRank.current === 'number' && away.curatedRank.current < 99) ? away.curatedRank.current : null;
+      var homeRank = (home.curatedRank && typeof home.curatedRank.current === 'number' && home.curatedRank.current < 99) ? home.curatedRank.current : null;
+
       return {
         eventId: event.id,
         date: event.date,
+        state: state,
         isFinal: isFinal,
         awayTbd: awayTbd,
         homeTbd: homeTbd,
+        awayTeamId: awayTbd ? null : String(away.team.id),
+        homeTeamId: homeTbd ? null : String(home.team.id),
+        awayRank: awayRank,
+        homeRank: homeRank,
         awayName: awayTbd ? 'TBD' : (away.team.displayName || away.team.name || 'Away'),
         awayAbbr: awayTbd ? 'TBD' : (away.team.abbreviation || away.team.shortDisplayName || 'AWAY'),
         awayLogo: awayTbd ? null : (away.team.logo || null),
@@ -580,16 +824,21 @@
     }
   }
 
-  function isMarked(eventId) {
-    return localStorage.getItem('interested_' + eventId) === 'true';
-  }
+  // ---- Card view ordering ----
+  function sortGamesForCardView(games) {
+    var byDate = function (a, b) { return new Date(a.date) - new Date(b.date); };
 
-  function setMarked(eventId, marked) {
-    if (marked) {
-      localStorage.setItem('interested_' + eventId, 'true');
-    } else {
-      localStorage.removeItem('interested_' + eventId);
-    }
+    var completed = games.filter(function (g) { return g.state === 'post'; });
+    var upcoming = games.filter(function (g) { return g.state !== 'post'; });
+
+    var starredCompleted = completed.filter(function (g) { return isMarked(g.eventId); });
+    var unstarredCompleted = completed.filter(function (g) { return !isMarked(g.eventId); });
+
+    starredCompleted.sort(byDate);
+    unstarredCompleted.sort(byDate);
+    upcoming.sort(byDate);
+
+    return starredCompleted.concat(unstarredCompleted, upcoming);
   }
 
   function buildTeamRow(logoUrl, name, isTbd, scoreText, isWinner, reserveForMark) {
@@ -624,35 +873,36 @@
 
   function renderGrid() {
     gridEl.innerHTML = '';
-    var anyVisible = false;
+    var starredOnly = activeView === 'cfb-starred';
+    var source = starredOnly ? cfbGames.filter(function (g) { return isMarked(g.eventId); }) : cfbGames.slice();
+    var games = sortGamesForCardView(source);
 
-    currentGames.forEach(function (game) {
+    games.forEach(function (game) {
       var marked = isMarked(game.eventId);
-      if (cardFilter === 'starred' && !marked) return;
-      anyVisible = true;
-
       var card = document.createElement('div');
       card.className = 'game-card';
 
-      var markBtn = document.createElement('button');
-      markBtn.className = 'mark-toggle' + (marked ? ' marked' : '');
-      markBtn.setAttribute('aria-label', 'Mark game as interested');
-      markBtn.innerHTML = marked ? '&#9733;' : '&#9734;';
-      markBtn.addEventListener('click', function () {
-        var nowMarked = !isMarked(game.eventId);
-        setMarked(game.eventId, nowMarked);
-        renderGrid();
-        renderTimeline();
-      });
-      card.appendChild(markBtn);
+      var showStarUi = game.state === 'pre';
+      if (showStarUi) {
+        var markBtn = document.createElement('button');
+        markBtn.className = 'mark-toggle' + (marked ? ' marked' : '');
+        markBtn.setAttribute('aria-label', 'Mark game as interested');
+        markBtn.innerHTML = marked ? '&#9733;' : '&#9734;';
+        markBtn.addEventListener('click', function () {
+          manualStar(game.eventId, !isMarked(game.eventId));
+          renderGrid();
+        });
+        card.appendChild(markBtn);
+      }
 
+      var showScore = game.state !== 'pre';
       card.appendChild(buildTeamRow(
         game.awayLogo, game.awayName, game.awayTbd,
-        game.isFinal ? game.awayScore : null, game.awayWinner, true
+        showScore ? game.awayScore : null, game.isFinal && game.awayWinner, showStarUi
       ));
       card.appendChild(buildTeamRow(
         game.homeLogo, game.homeName, game.homeTbd,
-        game.isFinal ? game.homeScore : null, game.homeWinner, false
+        showScore ? game.homeScore : null, game.isFinal && game.homeWinner, false
       ));
 
       var meta = document.createElement('div');
@@ -668,7 +918,7 @@
         meta.appendChild(netSpan);
       }
 
-      if (!game.isFinal) {
+      if (!showScore) {
         var spreadSpan = document.createElement('span');
         spreadSpan.textContent = game.spread;
         meta.appendChild(spreadSpan);
@@ -678,10 +928,10 @@
       gridEl.appendChild(card);
     });
 
-    if (cardFilter === 'starred' && !anyVisible) {
-      emptyEl.textContent = 'Star some games to see them here.';
+    if (starredOnly && !games.length) {
+      emptyEl.textContent = 'No starred games for this week.';
       emptyEl.style.display = '';
-    } else if (cardFilter === 'all' && !currentGames.length) {
+    } else if (!starredOnly && !games.length) {
       emptyEl.textContent = 'No games this week.';
       emptyEl.style.display = '';
     } else {
@@ -689,22 +939,7 @@
     }
   }
 
-  function updateFilterButtons() {
-    filterAllBtn.className = 'filter-btn-sm' + (cardFilter === 'all' ? ' active' : '');
-    filterStarredBtn.className = 'filter-btn-sm' + (cardFilter === 'starred' ? ' active' : '');
-    var disable = activeView === 'timeline';
-    filterAllBtn.disabled = disable;
-    filterStarredBtn.disabled = disable;
-  }
-
-  function updateViewButtons() {
-    cardViewBtn.className = 'view-btn' + (activeView === 'card' ? ' active' : '');
-    timelineViewBtn.className = 'view-btn' + (activeView === 'timeline' ? ' active' : '');
-    cardViewEl.style.display = activeView === 'timeline' ? 'none' : '';
-    timelineViewEl.style.display = activeView === 'timeline' ? '' : 'none';
-    updateFilterButtons();
-  }
-
+  // ---- Timeline view (CFB Timeline + NFL Timeline share this) ----
   function formatSlotTime(ms) {
     return new Intl.DateTimeFormat('en-US', {
       timeZone: 'America/Chicago',
@@ -715,7 +950,6 @@
   }
 
   function ctDateKey(ms) {
-    // en-CA gives YYYY-MM-DD, which both identifies the CT calendar day and sorts correctly as a string.
     return new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Chicago',
       year: 'numeric',
@@ -736,16 +970,24 @@
 
     timelineListEl.innerHTML = '';
 
-    var starred = currentGames.filter(function (g) { return isMarked(g.eventId); });
+    var games, emptyText;
+    if (isNflView()) {
+      games = nflGames.slice();
+      emptyText = 'No games this week.';
+    } else {
+      games = cfbGames.filter(function (g) { return isMarked(g.eventId); });
+      emptyText = 'Star some games in CFB Home to see them here.';
+    }
 
-    if (!starred.length) {
+    if (!games.length) {
+      timelineEmptyEl.textContent = emptyText;
       timelineEmptyEl.style.display = '';
       return;
     }
     timelineEmptyEl.style.display = 'none';
 
     var groups = {};
-    starred.forEach(function (game) {
+    games.forEach(function (game) {
       var ms = new Date(game.date).getTime();
       if (!groups[ms]) groups[ms] = [];
       groups[ms].push(game);
@@ -771,6 +1013,11 @@
       var slot = document.createElement('div');
       slot.className = 'timeline-slot' + (prevMsInDay !== null && (ms - prevMsInDay) >= GAP_THRESHOLD_MS ? ' timeline-slot-gap' : '');
       prevMsInDay = ms;
+
+      var labelEl = document.createElement('div');
+      labelEl.className = 'timeline-row-label';
+      labelEl.textContent = groups[ms].map(function (g) { return g.awayAbbr + '@' + g.homeAbbr; }).join(', ');
+      slot.appendChild(labelEl);
 
       var timeEl = document.createElement('div');
       timeEl.className = 'timeline-time';
@@ -804,18 +1051,20 @@
     });
   }
 
-  function buildUrl(tab) {
-    var url = API_BASE + '?limit=100';
-    if (tab) url += '&seasontype=' + tab.seasonType + '&week=' + tab.week;
-    return url;
+  function renderActiveContent() {
+    if (isCardView()) {
+      renderGrid();
+    } else {
+      renderTimeline();
+    }
   }
 
-  function applyEventsToGames(events) {
-    var games = events.map(extractGame).filter(function (g) { return g !== null; });
-    games.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
-    currentGames = games;
-    renderGrid();
-    renderTimeline();
+  // ---- Fetching ----
+  function buildScoreboardUrl(sport, tab) {
+    var base = sport === 'nfl' ? NFL_API : CFB_API;
+    var url = base + '?limit=100';
+    if (tab) url += '&seasontype=' + tab.seasonType + '&week=' + tab.week;
+    return url;
   }
 
   function showContentLoading() {
@@ -827,7 +1076,6 @@
   }
 
   function showContentError() {
-    currentGames = [];
     gridEl.innerHTML = '';
     timelineListEl.innerHTML = '';
     emptyEl.style.display = 'none';
@@ -835,49 +1083,58 @@
     setStatus('Couldn\'t load games right now. Check your connection and try again.', true);
   }
 
-  function fetchWeek(tab) {
-    showContentLoading();
-    fetch(buildUrl(tab))
+  function updateStarredNavButtonState() {
+    var finished = cfbGames.length > 0 && cfbGames.every(function (g) { return g.state === 'post'; });
+    navBtns['cfb-starred'].disabled = finished;
+  }
+
+  function loadCfbGames(tab) {
+    return fetch(buildScoreboardUrl('cfb', tab))
       .then(function (res) {
         if (!res.ok) throw new Error('Request failed with status ' + res.status);
         return res.json();
       })
       .then(function (data) {
-        setStatus('', false);
-        applyEventsToGames(data.events || []);
+        var games = (data.events || []).map(function (e) { return extractGame(e, 'cfb'); }).filter(function (g) { return g !== null; });
+        games.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+        cfbGames = games;
+        runAutoStar(cfbGames);
+        updateStarredNavButtonState();
+      });
+  }
+
+  function loadNflGames(tab) {
+    return fetch(buildScoreboardUrl('nfl', tab))
+      .then(function (res) {
+        if (!res.ok) throw new Error('Request failed with status ' + res.status);
+        return res.json();
       })
-      .catch(showContentError);
+      .then(function (data) {
+        var games = (data.events || []).map(function (e) { return extractGame(e, 'nfl'); }).filter(function (g) { return g !== null; });
+        games.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+        nflGames = games;
+        nflLoaded = true;
+      });
   }
 
-  function renderWeekStrip() {
-    weekStripEl.innerHTML = '';
-    weekTabs.forEach(function (tab, idx) {
-      var btn = document.createElement('button');
-      btn.className = 'week-tab';
-      btn.textContent = tab.label;
-      btn.addEventListener('click', function () { selectWeek(idx); });
-      weekStripEl.appendChild(btn);
-    });
+  function fetchCfbWeek(tab) {
+    showContentLoading();
+    loadCfbGames(tab).then(function () {
+      setStatus('', false);
+      if (!isNflView()) renderActiveContent();
+    }).catch(showContentError);
   }
 
-  function updateWeekStripSelection() {
-    var children = weekStripEl.children;
-    for (var i = 0; i < children.length; i++) {
-      children[i].className = 'week-tab' + (i === selectedTabIndex ? ' selected' : '');
-    }
-    var sel = children[selectedTabIndex];
-    if (sel && sel.scrollIntoView) {
-      sel.scrollIntoView({ block: 'nearest', inline: 'center' });
-    }
+  function fetchNflWeek(tab) {
+    showContentLoading();
+    loadNflGames(tab).then(function () {
+      setStatus('', false);
+      if (isNflView()) renderActiveContent();
+    }).catch(showContentError);
   }
 
-  function selectWeek(idx) {
-    selectedTabIndex = idx;
-    updateWeekStripSelection();
-    fetchWeek(weekTabs[idx]);
-  }
-
-  function buildWeekTabs(calendar) {
+  // ---- Week tabs ----
+  function buildWeekTabs(calendar, maxRegularWeek, postseasonLabels) {
     var tabs = [];
     var regSeason = null, postseason = null;
     (calendar || []).forEach(function (g) {
@@ -887,18 +1144,20 @@
     if (regSeason) {
       regSeason.entries.forEach(function (entry) {
         var m = /^Week (\d+)$/.exec(entry.label);
-        if (m && parseInt(m[1], 10) <= 14) {
+        if (m && (!maxRegularWeek || parseInt(m[1], 10) <= maxRegularWeek)) {
           tabs.push({ label: entry.label, seasonType: 2, week: parseInt(entry.value, 10), sortKey: parseInt(m[1], 10) });
         }
       });
     }
     tabs.sort(function (a, b) { return a.sortKey - b.sortKey; });
-    if (postseason) {
-      var cfpEntry = null;
-      postseason.entries.forEach(function (e) { if (e.label === 'CFP') cfpEntry = e; });
-      if (cfpEntry) {
-        tabs.push({ label: 'CFP', seasonType: parseInt(postseason.value, 10), week: parseInt(cfpEntry.value, 10) });
-      }
+    if (postseason && postseasonLabels) {
+      postseasonLabels.forEach(function (wantedLabel) {
+        var entry = null;
+        postseason.entries.forEach(function (e) { if (e.label === wantedLabel) entry = e; });
+        if (entry) {
+          tabs.push({ label: wantedLabel, seasonType: parseInt(postseason.value, 10), week: parseInt(entry.value, 10) });
+        }
+      });
     }
     return tabs;
   }
@@ -916,6 +1175,163 @@
     return 0;
   }
 
+  function restoreSelectedIndex(tabs, storageKey, fallbackWeekNumber, fallbackSeasonType) {
+    var raw = localStorage.getItem(storageKey);
+    if (raw) {
+      try {
+        var saved = JSON.parse(raw);
+        for (var i = 0; i < tabs.length; i++) {
+          if (tabs[i].seasonType === saved.seasonType && tabs[i].week === saved.week) return i;
+        }
+      } catch (e) {}
+    }
+    return findDefaultTabIndex(tabs, fallbackWeekNumber, fallbackSeasonType);
+  }
+
+  function renderWeekStrip() {
+    var tabs = isNflView() ? nflWeekTabs : cfbWeekTabs;
+    var selIdx = isNflView() ? selectedNflIdx : selectedCfbIdx;
+    weekStripEl.innerHTML = '';
+    tabs.forEach(function (tab, idx) {
+      var btn = document.createElement('button');
+      btn.className = 'week-tab' + (idx === selIdx ? ' selected' : '');
+      btn.textContent = tab.label;
+      btn.addEventListener('click', function () { selectWeek(idx); });
+      weekStripEl.appendChild(btn);
+    });
+    var sel = weekStripEl.children[selIdx];
+    if (sel && sel.scrollIntoView) {
+      sel.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+  }
+
+  function selectWeek(idx) {
+    if (isNflView()) {
+      selectedNflIdx = idx;
+      localStorage.setItem('selectedNFLWeek', JSON.stringify(nflWeekTabs[idx]));
+      renderWeekStrip();
+      fetchNflWeek(nflWeekTabs[idx]);
+    } else {
+      selectedCfbIdx = idx;
+      localStorage.setItem('selectedCFBWeek', JSON.stringify(cfbWeekTabs[idx]));
+      renderWeekStrip();
+      fetchCfbWeek(cfbWeekTabs[idx]);
+    }
+  }
+
+  // ---- View switching ----
+  function updateNavButtons() {
+    Object.keys(navBtns).forEach(function (v) {
+      navBtns[v].className = 'nav-btn' + (activeView === v ? ' active' : '');
+    });
+  }
+
+  function updateViewVisibility() {
+    var showCard = isCardView();
+    cardViewEl.style.display = showCard ? '' : 'none';
+    timelineViewEl.style.display = showCard ? 'none' : '';
+  }
+
+  function switchView(view) {
+    if (activeView === view) return;
+    activeView = view;
+    localStorage.setItem('activeView', view);
+    updateNavButtons();
+    updateViewVisibility();
+    renderWeekStrip();
+    if (isNflView() && !nflLoaded) {
+      fetchNflWeek(nflWeekTabs[selectedNflIdx]);
+    } else {
+      renderActiveContent();
+    }
+  }
+
+  navBtns['cfb-home'].addEventListener('click', function () { switchView('cfb-home'); });
+  navBtns['cfb-starred'].addEventListener('click', function () { switchView('cfb-starred'); });
+  navBtns['cfb-timeline'].addEventListener('click', function () { switchView('cfb-timeline'); });
+  navBtns['nfl-timeline'].addEventListener('click', function () { switchView('nfl-timeline'); });
+
+  // ---- Hamburger menu ----
+  function renderMenuTeamList() {
+    var starredIds = getMenuStarredTeamIds();
+    menuTeamListEl.innerHTML = '';
+    P4_ND_TEAMS.forEach(function (group) {
+      var groupTitle = document.createElement('div');
+      groupTitle.className = 'menu-conf-group-title';
+      groupTitle.textContent = group.conf;
+      menuTeamListEl.appendChild(groupTitle);
+
+      group.teams.forEach(function (pair) {
+        var id = pair[0], name = pair[1];
+        var row = document.createElement('div');
+        row.className = 'menu-team-row';
+
+        var nameEl = document.createElement('div');
+        nameEl.className = 'menu-team-name';
+        nameEl.textContent = name;
+        row.appendChild(nameEl);
+
+        var starBtn = document.createElement('button');
+        var isOn = starredIds.indexOf(id) !== -1;
+        starBtn.className = 'menu-team-star' + (isOn ? ' active' : '');
+        starBtn.innerHTML = isOn ? '&#9733;' : '&#9734;';
+        starBtn.addEventListener('click', function () {
+          var ids = getMenuStarredTeamIds();
+          var pos = ids.indexOf(id);
+          if (pos === -1) ids.push(id); else ids.splice(pos, 1);
+          setMenuStarredTeamIds(ids);
+          var nowOn = ids.indexOf(id) !== -1;
+          starBtn.className = 'menu-team-star' + (nowOn ? ' active' : '');
+          starBtn.innerHTML = nowOn ? '&#9733;' : '&#9734;';
+          if (!isNflView()) {
+            runAutoStar(cfbGames);
+            renderActiveContent();
+          }
+        });
+        row.appendChild(starBtn);
+
+        menuTeamListEl.appendChild(row);
+      });
+    });
+  }
+
+  function renderMenuRankOptions() {
+    var current = getRankingThreshold();
+    menuRankOptionsEl.innerHTML = '';
+    RANK_OPTIONS.forEach(function (n) {
+      var btn = document.createElement('button');
+      btn.className = 'menu-rank-btn' + (n === current ? ' active' : '');
+      btn.textContent = 'Top ' + n;
+      btn.addEventListener('click', function () {
+        setRankingThreshold(n);
+        renderMenuRankOptions();
+        if (!isNflView()) {
+          runAutoStar(cfbGames);
+          renderActiveContent();
+        }
+      });
+      menuRankOptionsEl.appendChild(btn);
+    });
+  }
+
+  function openMenu() {
+    menuNflNote.style.display = isNflView() ? '' : 'none';
+    renderMenuTeamList();
+    renderMenuRankOptions();
+    menuOverlay.style.display = 'flex';
+  }
+
+  function closeMenu() {
+    menuOverlay.style.display = 'none';
+  }
+
+  menuBtn.addEventListener('click', openMenu);
+  menuCloseBtn.addEventListener('click', closeMenu);
+  menuOverlay.addEventListener('click', function (e) {
+    if (e.target === menuOverlay) closeMenu();
+  });
+
+  // ---- Week strip drag-scroll ----
   function enableDragScroll(el) {
     var isDown = false, startX, startScrollLeft;
 
@@ -946,63 +1362,66 @@
     }, { passive: false });
   }
 
+  // ---- Init ----
   function init() {
+    updateNavButtons();
+    updateViewVisibility();
     showContentLoading();
-    fetch(buildUrl(null))
+
+    fetch(buildScoreboardUrl('cfb', null))
       .then(function (res) {
         if (!res.ok) throw new Error('Request failed with status ' + res.status);
         return res.json();
       })
       .then(function (data) {
         var calendar = data.leagues && data.leagues[0] && data.leagues[0].calendar;
-        weekTabs = buildWeekTabs(calendar);
-        renderWeekStrip();
+        cfbWeekTabs = buildWeekTabs(calendar, 14, ['CFP']);
 
         var weekNumber = data.week && data.week.number;
         var seasonType = data.season && data.season.type;
-        selectedTabIndex = findDefaultTabIndex(weekTabs, weekNumber, seasonType);
-        updateWeekStripSelection();
+        selectedCfbIdx = restoreSelectedIndex(cfbWeekTabs, 'selectedCFBWeek', weekNumber, seasonType);
 
-        setStatus('', false);
-        applyEventsToGames(data.events || []);
+        if (!isNflView()) renderWeekStrip();
+
+        return loadCfbGames(cfbWeekTabs[selectedCfbIdx]);
       })
-      .catch(showContentError);
+      .then(function () {
+        if (!isNflView()) {
+          setStatus('', false);
+          renderActiveContent();
+        }
+      })
+      .catch(function () {
+        if (!isNflView()) showContentError();
+      });
+
+    fetch(buildScoreboardUrl('nfl', null))
+      .then(function (res) {
+        if (!res.ok) throw new Error('Request failed with status ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        var calendar = data.leagues && data.leagues[0] && data.leagues[0].calendar;
+        nflWeekTabs = buildWeekTabs(calendar, null, ['Wild Card', 'Divisional Round', 'Conference Championship', 'Super Bowl']);
+
+        var weekNumber = data.week && data.week.number;
+        var seasonType = data.season && data.season.type;
+        selectedNflIdx = restoreSelectedIndex(nflWeekTabs, 'selectedNFLWeek', weekNumber, seasonType);
+
+        if (isNflView()) {
+          renderWeekStrip();
+          return loadNflGames(nflWeekTabs[selectedNflIdx]).then(function () {
+            setStatus('', false);
+            renderActiveContent();
+          });
+        }
+      })
+      .catch(function () {
+        if (isNflView()) showContentError();
+      });
   }
 
-  cardViewBtn.addEventListener('click', function () {
-    if (activeView === 'card') return;
-    activeView = 'card';
-    localStorage.setItem('activeView', activeView);
-    updateViewButtons();
-  });
-
-  timelineViewBtn.addEventListener('click', function () {
-    if (activeView === 'timeline') return;
-    activeView = 'timeline';
-    localStorage.setItem('activeView', activeView);
-    updateViewButtons();
-    renderTimeline();
-  });
-
-  filterAllBtn.addEventListener('click', function () {
-    if (activeView !== 'card' || cardFilter === 'all') return;
-    cardFilter = 'all';
-    localStorage.setItem('cardFilter', cardFilter);
-    updateFilterButtons();
-    renderGrid();
-  });
-
-  filterStarredBtn.addEventListener('click', function () {
-    if (activeView !== 'card' || cardFilter === 'starred') return;
-    cardFilter = 'starred';
-    localStorage.setItem('cardFilter', cardFilter);
-    updateFilterButtons();
-    renderGrid();
-  });
-
   enableDragScroll(weekStripEl);
-
-  updateViewButtons();
   init();
 })();
 </script>
