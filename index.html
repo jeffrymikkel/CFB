@@ -27,17 +27,20 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  header {
+  .top-bar {
     position: sticky;
     top: 0;
     z-index: 10;
     background: var(--card-bg);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
+  }
+
+  header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
@@ -47,35 +50,11 @@
     display: none;
   }
 
-  header h1 {
-    font-size: 18px;
-    margin: 0;
-    font-weight: 700;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .header-actions {
+  .header-left {
     display: flex;
-    gap: 8px;
     align-items: center;
+    gap: 6px;
     flex-shrink: 0;
-    flex-wrap: nowrap;
-  }
-
-  @media (max-width: 480px) {
-    header {
-      padding: 10px 12px;
-    }
-
-    header h1 {
-      font-size: 16px;
-    }
-
-    .header-actions button {
-      padding: 7px 10px;
-      font-size: 13px;
-    }
   }
 
   button {
@@ -84,30 +63,112 @@
     border-radius: 6px;
     border: 1px solid var(--border);
     background: var(--card-bg);
-    padding: 8px 12px;
-    font-size: 14px;
-    font-weight: 600;
     color: var(--text);
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, opacity 0.15s ease;
   }
 
-  button:hover {
+  .view-btn {
+    flex-shrink: 0;
+    background: transparent;
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .view-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .view-btn:hover:not(.active) {
     background: #f0f1f3;
   }
 
-  button.primary {
+  .filter-btn-sm {
+    flex-shrink: 0;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 5px 9px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .filter-btn-sm.active {
+    background: var(--bg);
+    color: var(--text);
+    border-color: var(--text);
+    font-weight: 700;
+  }
+
+  .filter-btn-sm:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  #week-strip {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+    cursor: grab;
+  }
+
+  #week-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  #week-strip.dragging {
+    cursor: grabbing;
+  }
+
+  .week-tab {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .week-tab.selected {
     background: var(--accent);
     color: #fff;
-    border-color: var(--accent);
+    font-weight: 700;
   }
 
-  button.primary:hover {
-    background: var(--accent-hover);
+  .week-tab:hover:not(.selected) {
+    background: var(--bg);
   }
 
-  button:disabled {
-    opacity: 0.5;
-    cursor: default;
+  @media (max-width: 480px) {
+    header {
+      padding: 10px 12px;
+    }
+
+    .view-btn {
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .filter-btn-sm {
+      padding: 4px 7px;
+      font-size: 11px;
+    }
+
+    #week-strip {
+      padding: 8px 12px;
+    }
+
+    .week-tab {
+      padding: 5px 9px;
+      font-size: 12px;
+    }
   }
 
   main {
@@ -170,10 +231,6 @@
     position: relative;
   }
 
-  .game-card.hidden {
-    display: none;
-  }
-
   .team-row {
     display: flex;
     align-items: center;
@@ -201,6 +258,20 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .team-score {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    padding-left: 8px;
+  }
+
+  .team-score.winner {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
   }
 
   .mark-toggle {
@@ -312,6 +383,11 @@
     flex-shrink: 0;
   }
 
+  .timeline-game-card img.placeholder {
+    background: var(--card-bg);
+    border-radius: 50%;
+  }
+
   #timeline-empty-message {
     text-align: center;
     padding: 40px 16px;
@@ -322,20 +398,23 @@
 </head>
 <body>
 
-<header>
-  <h1>CFB This Week</h1>
-  <div class="header-actions">
-    <button id="refresh-btn" title="Refresh games">&#8635; Refresh</button>
-    <button id="filter-btn" class="primary">Show Marked Only</button>
-    <button id="view-toggle-btn">Timeline</button>
-  </div>
-</header>
+<div class="top-bar">
+  <header>
+    <div class="header-left">
+      <button id="card-view-btn" class="view-btn active">Card View</button>
+      <button id="filter-all-btn" class="filter-btn-sm active">All Games</button>
+      <button id="filter-starred-btn" class="filter-btn-sm">&#9733;</button>
+    </div>
+    <button id="timeline-view-btn" class="view-btn">Timeline View</button>
+  </header>
+  <div id="week-strip"></div>
+</div>
 
 <main>
   <div id="status-message"></div>
 
   <div id="card-view">
-    <div id="empty-message" style="display:none;">No games marked yet.</div>
+    <div id="empty-message" style="display:none;"></div>
     <div id="game-grid"></div>
   </div>
 
@@ -349,26 +428,34 @@
 (function () {
   'use strict';
 
-  var API_URL = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?limit=100';
+  var API_BASE = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard';
 
   // Confirmed against the live ESPN response: team.conferenceId values for the four Power conferences.
   var P4_CONFERENCE_IDS = ['1', '4', '5', '8']; // ACC, Big 12, Big Ten, SEC
   var NOTRE_DAME_ID = '87';
 
+  // Confirmed against live Week 14 (conference championship) data: exact note headlines
+  // ESPN attaches to P4 title games while both teams are still TBD.
+  var P4_CHAMPIONSHIP_HEADLINES = ['ACC Championship', 'Big 12 Championship', 'Big Ten Championship', 'SEC Championship'];
+
   var statusEl = document.getElementById('status-message');
   var emptyEl = document.getElementById('empty-message');
   var gridEl = document.getElementById('game-grid');
-  var refreshBtn = document.getElementById('refresh-btn');
-  var filterBtn = document.getElementById('filter-btn');
-  var viewToggleBtn = document.getElementById('view-toggle-btn');
+  var cardViewBtn = document.getElementById('card-view-btn');
+  var timelineViewBtn = document.getElementById('timeline-view-btn');
+  var filterAllBtn = document.getElementById('filter-all-btn');
+  var filterStarredBtn = document.getElementById('filter-starred-btn');
+  var weekStripEl = document.getElementById('week-strip');
   var cardViewEl = document.getElementById('card-view');
   var timelineViewEl = document.getElementById('timeline-view');
   var timelineEmptyEl = document.getElementById('timeline-empty-message');
   var timelineListEl = document.getElementById('timeline-list');
 
   var currentGames = [];
-  var filterActive = localStorage.getItem('filterActive') === 'true';
+  var weekTabs = [];
+  var selectedTabIndex = -1;
   var activeView = localStorage.getItem('activeView') === 'timeline' ? 'timeline' : 'card';
+  var cardFilter = localStorage.getItem('cardFilter') === 'starred' ? 'starred' : 'all';
 
   function setStatus(html, isError) {
     statusEl.style.display = html ? '' : 'none';
@@ -381,6 +468,22 @@
     if (String(team.id) === NOTRE_DAME_ID) return true;
     if (team.displayName && team.displayName.indexOf('Notre Dame') !== -1) return true;
     if (team.conferenceId && P4_CONFERENCE_IDS.indexOf(String(team.conferenceId)) !== -1) return true;
+    return false;
+  }
+
+  function isTbdTeam(team) {
+    return !team || team.isActive === false;
+  }
+
+  function qualifiesForP4Filter(awayTeam, homeTeam, notes) {
+    if (isP4orND(awayTeam) || isP4orND(homeTeam)) return true;
+    // Neither team has resolved yet (conf championship / CFP not yet bracketed) -- fall
+    // back to the game's note headline, which names the specific championship/bracket.
+    for (var i = 0; i < notes.length; i++) {
+      var headline = notes[i].headline || '';
+      if (P4_CHAMPIONSHIP_HEADLINES.indexOf(headline) !== -1) return true;
+      if (headline.indexOf('College Football Playoff') !== -1) return true;
+    }
     return false;
   }
 
@@ -426,23 +529,36 @@
       }
       if (!away || !home) return null;
 
-      var qualifies = isP4orND(away.team) || isP4orND(home.team);
-      if (!qualifies) return null;
+      var notes = competition.notes || [];
+      if (!qualifiesForP4Filter(away.team, home.team, notes)) return null;
 
       var network = null;
       if (competition.broadcasts && competition.broadcasts.length && competition.broadcasts[0].names && competition.broadcasts[0].names.length) {
         network = competition.broadcasts[0].names.join('/');
       }
 
+      var statusType = (competition.status && competition.status.type) || {};
+      var isFinal = !!statusType.completed;
+
+      var awayTbd = isTbdTeam(away.team);
+      var homeTbd = isTbdTeam(home.team);
+
       return {
         eventId: event.id,
         date: event.date,
-        awayName: away.team.displayName || away.team.name || 'Away',
-        awayAbbr: away.team.abbreviation || away.team.shortDisplayName || 'AWAY',
-        awayLogo: away.team.logo || null,
-        homeName: home.team.displayName || home.team.name || 'Home',
-        homeAbbr: home.team.abbreviation || home.team.shortDisplayName || 'HOME',
-        homeLogo: home.team.logo || null,
+        isFinal: isFinal,
+        awayTbd: awayTbd,
+        homeTbd: homeTbd,
+        awayName: awayTbd ? 'TBD' : (away.team.displayName || away.team.name || 'Away'),
+        awayAbbr: awayTbd ? 'TBD' : (away.team.abbreviation || away.team.shortDisplayName || 'AWAY'),
+        awayLogo: awayTbd ? null : (away.team.logo || null),
+        awayScore: away.score,
+        awayWinner: !!away.winner,
+        homeName: homeTbd ? 'TBD' : (home.team.displayName || home.team.name || 'Home'),
+        homeAbbr: homeTbd ? 'TBD' : (home.team.abbreviation || home.team.shortDisplayName || 'HOME'),
+        homeLogo: homeTbd ? null : (home.team.logo || null),
+        homeScore: home.score,
+        homeWinner: !!home.winner,
         network: network,
         spread: getSpreadDisplay(competition)
       };
@@ -463,18 +579,43 @@
     }
   }
 
-  function renderGrid() {
-    gridEl.innerHTML = '';
+  function buildTeamRow(logoUrl, name, isTbd, scoreText, isWinner) {
+    var row = document.createElement('div');
+    row.className = 'team-row';
 
-    if (!currentGames.length) {
-      return;
+    var img = document.createElement('img');
+    img.className = 'team-logo' + (isTbd || !logoUrl ? ' placeholder' : '');
+    img.alt = '';
+    if (logoUrl && !isTbd) {
+      img.src = logoUrl;
+      img.onerror = function () {
+        this.style.visibility = 'hidden';
+      };
+    }
+    row.appendChild(img);
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'team-name';
+    nameEl.textContent = name;
+    row.appendChild(nameEl);
+
+    if (scoreText !== null && scoreText !== undefined) {
+      var scoreEl = document.createElement('div');
+      scoreEl.className = 'team-score' + (isWinner ? ' winner' : '');
+      scoreEl.textContent = scoreText;
+      row.appendChild(scoreEl);
     }
 
+    return row;
+  }
+
+  function renderGrid() {
+    gridEl.innerHTML = '';
     var anyVisible = false;
 
     currentGames.forEach(function (game) {
       var marked = isMarked(game.eventId);
-      if (filterActive && !marked) return;
+      if (cardFilter === 'starred' && !marked) return;
       anyVisible = true;
 
       var card = document.createElement('div');
@@ -492,14 +633,20 @@
       });
       card.appendChild(markBtn);
 
-      card.appendChild(buildTeamRow(game.awayLogo, game.awayName));
-      card.appendChild(buildTeamRow(game.homeLogo, game.homeName));
+      card.appendChild(buildTeamRow(
+        game.awayLogo, game.awayName, game.awayTbd,
+        game.isFinal ? game.awayScore : null, game.awayWinner
+      ));
+      card.appendChild(buildTeamRow(
+        game.homeLogo, game.homeName, game.homeTbd,
+        game.isFinal ? game.homeScore : null, game.homeWinner
+      ));
 
       var meta = document.createElement('div');
       meta.className = 'game-meta';
 
       var timeSpan = document.createElement('span');
-      timeSpan.textContent = formatKickoff(game.date) || 'Time TBD';
+      timeSpan.textContent = (game.awayTbd || game.homeTbd) ? 'TBA' : (formatKickoff(game.date) || 'Time TBD');
       meta.appendChild(timeSpan);
 
       if (game.network) {
@@ -508,50 +655,41 @@
         meta.appendChild(netSpan);
       }
 
-      var spreadSpan = document.createElement('span');
-      spreadSpan.textContent = game.spread;
-      meta.appendChild(spreadSpan);
+      if (!game.isFinal) {
+        var spreadSpan = document.createElement('span');
+        spreadSpan.textContent = game.spread;
+        meta.appendChild(spreadSpan);
+      }
 
       card.appendChild(meta);
       gridEl.appendChild(card);
     });
 
-    emptyEl.style.display = (filterActive && !anyVisible) ? '' : 'none';
-  }
-
-  function buildTeamRow(logoUrl, name) {
-    var row = document.createElement('div');
-    row.className = 'team-row';
-
-    var img = document.createElement('img');
-    img.className = 'team-logo';
-    img.alt = '';
-    if (logoUrl) {
-      img.src = logoUrl;
-      img.onerror = function () {
-        this.style.visibility = 'hidden';
-      };
+    if (cardFilter === 'starred' && !anyVisible) {
+      emptyEl.textContent = 'Star some games to see them here.';
+      emptyEl.style.display = '';
+    } else if (cardFilter === 'all' && !currentGames.length) {
+      emptyEl.textContent = 'No games this week.';
+      emptyEl.style.display = '';
     } else {
-      img.className += ' placeholder';
+      emptyEl.style.display = 'none';
     }
-    row.appendChild(img);
-
-    var nameEl = document.createElement('div');
-    nameEl.className = 'team-name';
-    nameEl.textContent = name;
-    row.appendChild(nameEl);
-
-    return row;
   }
 
-  function updateFilterButton() {
-    filterBtn.textContent = filterActive ? 'Show All Games' : 'Show Marked Only';
+  function updateFilterButtons() {
+    filterAllBtn.className = 'filter-btn-sm' + (cardFilter === 'all' ? ' active' : '');
+    filterStarredBtn.className = 'filter-btn-sm' + (cardFilter === 'starred' ? ' active' : '');
+    var disable = activeView === 'timeline';
+    filterAllBtn.disabled = disable;
+    filterStarredBtn.disabled = disable;
   }
 
-  function updateViewToggleButton() {
-    viewToggleBtn.textContent = activeView === 'timeline' ? 'Card View' : 'Timeline';
+  function updateViewButtons() {
+    cardViewBtn.className = 'view-btn' + (activeView === 'card' ? ' active' : '');
+    timelineViewBtn.className = 'view-btn' + (activeView === 'timeline' ? ' active' : '');
     cardViewEl.style.display = activeView === 'timeline' ? 'none' : '';
     timelineViewEl.style.display = activeView === 'timeline' ? '' : 'none';
+    updateFilterButtons();
   }
 
   function formatSlotTime(ms) {
@@ -604,13 +742,15 @@
         card.className = 'timeline-game-card';
 
         var awayImg = document.createElement('img');
+        awayImg.className = (game.awayTbd || !game.awayLogo) ? 'placeholder' : '';
         awayImg.alt = game.awayAbbr;
-        if (game.awayLogo) awayImg.src = game.awayLogo;
+        if (game.awayLogo && !game.awayTbd) awayImg.src = game.awayLogo;
         card.appendChild(awayImg);
 
         var homeImg = document.createElement('img');
+        homeImg.className = (game.homeTbd || !game.homeLogo) ? 'placeholder' : '';
         homeImg.alt = game.homeAbbr;
-        if (game.homeLogo) homeImg.src = game.homeLogo;
+        if (game.homeLogo && !game.homeTbd) homeImg.src = game.homeLogo;
         card.appendChild(homeImg);
 
         gamesWrap.appendChild(card);
@@ -621,64 +761,206 @@
     });
   }
 
-  function loadGames() {
+  function buildUrl(tab) {
+    var url = API_BASE + '?limit=100';
+    if (tab) url += '&seasontype=' + tab.seasonType + '&week=' + tab.week;
+    return url;
+  }
+
+  function applyEventsToGames(events) {
+    var games = events.map(extractGame).filter(function (g) { return g !== null; });
+    games.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+    currentGames = games;
+    renderGrid();
+    renderTimeline();
+  }
+
+  function showContentLoading() {
     setStatus('<span class="spinner"></span>Loading games...', false);
     gridEl.innerHTML = '';
+    timelineListEl.innerHTML = '';
     emptyEl.style.display = 'none';
-    refreshBtn.disabled = true;
+    timelineEmptyEl.style.display = 'none';
+  }
 
-    fetch(API_URL)
+  function showContentError() {
+    currentGames = [];
+    gridEl.innerHTML = '';
+    timelineListEl.innerHTML = '';
+    emptyEl.style.display = 'none';
+    timelineEmptyEl.style.display = 'none';
+    setStatus('Couldn\'t load games right now. Check your connection and try again.', true);
+  }
+
+  function fetchWeek(tab) {
+    showContentLoading();
+    fetch(buildUrl(tab))
       .then(function (res) {
         if (!res.ok) throw new Error('Request failed with status ' + res.status);
         return res.json();
       })
       .then(function (data) {
-        var events = data.events || [];
-        var games = events
-          .map(extractGame)
-          .filter(function (g) { return g !== null; });
-
-        games.sort(function (a, b) {
-          return new Date(a.date) - new Date(b.date);
-        });
-
-        currentGames = games;
         setStatus('', false);
-        renderGrid();
-        renderTimeline();
+        applyEventsToGames(data.events || []);
       })
-      .catch(function (err) {
-        currentGames = [];
-        gridEl.innerHTML = '';
-        emptyEl.style.display = 'none';
-        timelineListEl.innerHTML = '';
-        timelineEmptyEl.style.display = 'none';
-        setStatus('Couldn\'t load games right now. Check your connection and try refreshing.', true);
-      })
-      .finally(function () {
-        refreshBtn.disabled = false;
-      });
+      .catch(showContentError);
   }
 
-  refreshBtn.addEventListener('click', loadGames);
+  function renderWeekStrip() {
+    weekStripEl.innerHTML = '';
+    weekTabs.forEach(function (tab, idx) {
+      var btn = document.createElement('button');
+      btn.className = 'week-tab';
+      btn.textContent = tab.label;
+      btn.addEventListener('click', function () { selectWeek(idx); });
+      weekStripEl.appendChild(btn);
+    });
+  }
 
-  filterBtn.addEventListener('click', function () {
-    filterActive = !filterActive;
-    localStorage.setItem('filterActive', filterActive ? 'true' : 'false');
-    updateFilterButton();
+  function updateWeekStripSelection() {
+    var children = weekStripEl.children;
+    for (var i = 0; i < children.length; i++) {
+      children[i].className = 'week-tab' + (i === selectedTabIndex ? ' selected' : '');
+    }
+    var sel = children[selectedTabIndex];
+    if (sel && sel.scrollIntoView) {
+      sel.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+  }
+
+  function selectWeek(idx) {
+    selectedTabIndex = idx;
+    updateWeekStripSelection();
+    fetchWeek(weekTabs[idx]);
+  }
+
+  function buildWeekTabs(calendar) {
+    var tabs = [];
+    var regSeason = null, postseason = null;
+    (calendar || []).forEach(function (g) {
+      if (String(g.value) === '2') regSeason = g;
+      if (String(g.value) === '3') postseason = g;
+    });
+    if (regSeason) {
+      regSeason.entries.forEach(function (entry) {
+        var m = /^Week (\d+)$/.exec(entry.label);
+        if (m && parseInt(m[1], 10) <= 14) {
+          tabs.push({ label: entry.label, seasonType: 2, week: parseInt(entry.value, 10), sortKey: parseInt(m[1], 10) });
+        }
+      });
+    }
+    tabs.sort(function (a, b) { return a.sortKey - b.sortKey; });
+    if (postseason) {
+      var cfpEntry = null;
+      postseason.entries.forEach(function (e) { if (e.label === 'CFP') cfpEntry = e; });
+      if (cfpEntry) {
+        tabs.push({ label: 'CFP', seasonType: parseInt(postseason.value, 10), week: parseInt(cfpEntry.value, 10) });
+      }
+    }
+    return tabs;
+  }
+
+  function findDefaultTabIndex(tabs, weekNumber, seasonType) {
+    for (var i = 0; i < tabs.length; i++) {
+      if (tabs[i].seasonType === seasonType && tabs[i].week === weekNumber) return i;
+    }
+    if (seasonType === 3) return tabs.length - 1;
+    if (seasonType === 2) {
+      for (var j = tabs.length - 1; j >= 0; j--) {
+        if (tabs[j].seasonType === 2 && tabs[j].week <= weekNumber) return j;
+      }
+    }
+    return 0;
+  }
+
+  function enableDragScroll(el) {
+    var isDown = false, startX, startScrollLeft;
+
+    el.addEventListener('mousedown', function (e) {
+      isDown = true;
+      el.classList.add('dragging');
+      startX = e.pageX;
+      startScrollLeft = el.scrollLeft;
+    });
+    window.addEventListener('mouseup', function () {
+      isDown = false;
+      el.classList.remove('dragging');
+    });
+    el.addEventListener('mouseleave', function () {
+      isDown = false;
+      el.classList.remove('dragging');
+    });
+    el.addEventListener('mousemove', function (e) {
+      if (!isDown) return;
+      e.preventDefault();
+      el.scrollLeft = startScrollLeft - (e.pageX - startX);
+    });
+    el.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        el.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+
+  function init() {
+    showContentLoading();
+    fetch(buildUrl(null))
+      .then(function (res) {
+        if (!res.ok) throw new Error('Request failed with status ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        var calendar = data.leagues && data.leagues[0] && data.leagues[0].calendar;
+        weekTabs = buildWeekTabs(calendar);
+        renderWeekStrip();
+
+        var weekNumber = data.week && data.week.number;
+        var seasonType = data.season && data.season.type;
+        selectedTabIndex = findDefaultTabIndex(weekTabs, weekNumber, seasonType);
+        updateWeekStripSelection();
+
+        setStatus('', false);
+        applyEventsToGames(data.events || []);
+      })
+      .catch(showContentError);
+  }
+
+  cardViewBtn.addEventListener('click', function () {
+    if (activeView === 'card') return;
+    activeView = 'card';
+    localStorage.setItem('activeView', activeView);
+    updateViewButtons();
+  });
+
+  timelineViewBtn.addEventListener('click', function () {
+    if (activeView === 'timeline') return;
+    activeView = 'timeline';
+    localStorage.setItem('activeView', activeView);
+    updateViewButtons();
+    renderTimeline();
+  });
+
+  filterAllBtn.addEventListener('click', function () {
+    if (activeView !== 'card' || cardFilter === 'all') return;
+    cardFilter = 'all';
+    localStorage.setItem('cardFilter', cardFilter);
+    updateFilterButtons();
     renderGrid();
   });
 
-  viewToggleBtn.addEventListener('click', function () {
-    activeView = activeView === 'timeline' ? 'card' : 'timeline';
-    localStorage.setItem('activeView', activeView);
-    updateViewToggleButton();
-    if (activeView === 'timeline') renderTimeline();
+  filterStarredBtn.addEventListener('click', function () {
+    if (activeView !== 'card' || cardFilter === 'starred') return;
+    cardFilter = 'starred';
+    localStorage.setItem('cardFilter', cardFilter);
+    updateFilterButtons();
+    renderGrid();
   });
 
-  updateFilterButton();
-  updateViewToggleButton();
-  loadGames();
+  enableDragScroll(weekStripEl);
+
+  updateViewButtons();
+  init();
 })();
 </script>
 
