@@ -190,6 +190,10 @@
     gap: 12px;
   }
 
+  #game-grid .day-label {
+    grid-column: 1 / -1;
+  }
+
   @media (min-width: 640px) {
     #game-grid {
       grid-template-columns: repeat(2, 1fr);
@@ -315,7 +319,7 @@
     padding: 4px 14px;
   }
 
-  .timeline-day-label {
+  .day-label {
     font-size: 15px;
     font-weight: 800;
     letter-spacing: 0.04em;
@@ -323,7 +327,7 @@
     padding: 10px 0 4px;
   }
 
-  .timeline-day-label-sep {
+  .day-label-sep {
     margin-top: 8px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
@@ -342,13 +346,10 @@
     border-top: 1px solid var(--border);
   }
 
-  .timeline-row-label {
-    flex: 0 0 72px;
-    font-size: 11px;
-    font-weight: 700;
+  #timeline-disclaimer {
+    font-size: 12px;
     color: var(--text-muted);
-    line-height: 1.3;
-    padding-top: 6px;
+    padding: 4px 2px 12px;
   }
 
   .timeline-time {
@@ -538,6 +539,7 @@
   </div>
 
   <div id="timeline-view" style="display:none;">
+    <div id="timeline-disclaimer" style="display:none;">Timeline shows starred games from previous tab</div>
     <div id="timeline-empty-message" style="display:none;"></div>
     <div id="timeline-list"></div>
   </div>
@@ -620,6 +622,7 @@
   var gridEl = document.getElementById('game-grid');
   var cardViewEl = document.getElementById('card-view');
   var timelineViewEl = document.getElementById('timeline-view');
+  var timelineDisclaimerEl = document.getElementById('timeline-disclaimer');
   var timelineEmptyEl = document.getElementById('timeline-empty-message');
   var timelineListEl = document.getElementById('timeline-list');
   var weekStripEl = document.getElementById('week-strip');
@@ -877,7 +880,21 @@
     var source = starredOnly ? cfbGames.filter(function (g) { return isMarked(g.eventId); }) : cfbGames.slice();
     var games = sortGamesForCardView(source);
 
+    var prevDayKey = null;
+    var isFirstDay = true;
+
     games.forEach(function (game) {
+      var kickoffMs = new Date(game.date).getTime();
+      var dayKey = ctDateKey(kickoffMs);
+      if (dayKey !== prevDayKey) {
+        var dayLabel = document.createElement('div');
+        dayLabel.className = 'day-label' + (isFirstDay ? '' : ' day-label-sep');
+        dayLabel.textContent = ctDayAbbrev(kickoffMs);
+        gridEl.appendChild(dayLabel);
+        prevDayKey = dayKey;
+        isFirstDay = false;
+      }
+
       var marked = isMarked(game.eventId);
       var card = document.createElement('div');
       card.className = 'game-card';
@@ -968,6 +985,7 @@
   function renderTimeline() {
     var GAP_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
 
+    timelineDisclaimerEl.style.display = isCfbTimelineView() ? '' : 'none';
     timelineListEl.innerHTML = '';
 
     var games, emptyText;
@@ -1002,7 +1020,7 @@
       var dayKey = ctDateKey(ms);
       if (dayKey !== prevDayKey) {
         var dayLabel = document.createElement('div');
-        dayLabel.className = 'timeline-day-label' + (isFirstDay ? '' : ' timeline-day-label-sep');
+        dayLabel.className = 'day-label' + (isFirstDay ? '' : ' day-label-sep');
         dayLabel.textContent = ctDayAbbrev(ms);
         timelineListEl.appendChild(dayLabel);
         prevDayKey = dayKey;
@@ -1013,11 +1031,6 @@
       var slot = document.createElement('div');
       slot.className = 'timeline-slot' + (prevMsInDay !== null && (ms - prevMsInDay) >= GAP_THRESHOLD_MS ? ' timeline-slot-gap' : '');
       prevMsInDay = ms;
-
-      var labelEl = document.createElement('div');
-      labelEl.className = 'timeline-row-label';
-      labelEl.textContent = groups[ms].map(function (g) { return g.awayAbbr + '@' + g.homeAbbr; }).join(', ');
-      slot.appendChild(labelEl);
 
       var timeEl = document.createElement('div');
       timeEl.className = 'timeline-time';
@@ -1230,6 +1243,7 @@
     var showCard = isCardView();
     cardViewEl.style.display = showCard ? '' : 'none';
     timelineViewEl.style.display = showCard ? 'none' : '';
+    timelineDisclaimerEl.style.display = isCfbTimelineView() ? '' : 'none';
   }
 
   function switchView(view) {
