@@ -795,6 +795,12 @@
       var awayTbd = isTbdTeam(away.team);
       var homeTbd = isTbdTeam(home.team);
 
+      // Confirmed against live Week 4 data: ESPN sets competition.timeValid = false and uses a
+      // placeholder UTC timestamp (e.g. 4:00 AM) when the kickoff time isn't confirmed yet. Converting
+      // that placeholder to Central Time can shift it to the previous calendar day, so games flagged
+      // this way must skip timezone conversion entirely for both display and day-grouping.
+      var timeTbd = competition.timeValid === false;
+
       var awayRank = (away.curatedRank && typeof away.curatedRank.current === 'number' && away.curatedRank.current < 99) ? away.curatedRank.current : null;
       var homeRank = (home.curatedRank && typeof home.curatedRank.current === 'number' && home.curatedRank.current < 99) ? home.curatedRank.current : null;
 
@@ -805,6 +811,7 @@
         isFinal: isFinal,
         awayTbd: awayTbd,
         homeTbd: homeTbd,
+        timeTbd: timeTbd,
         awayTeamId: awayTbd ? null : String(away.team.id),
         homeTeamId: homeTbd ? null : String(home.team.id),
         awayRank: awayRank,
@@ -884,12 +891,11 @@
     var isFirstDay = true;
 
     games.forEach(function (game) {
-      var kickoffMs = new Date(game.date).getTime();
-      var dayKey = ctDateKey(kickoffMs);
+      var dayKey = gameDayKey(game);
       if (dayKey !== prevDayKey) {
         var dayLabel = document.createElement('div');
         dayLabel.className = 'day-label' + (isFirstDay ? '' : ' day-label-sep');
-        dayLabel.textContent = ctDayAbbrev(kickoffMs);
+        dayLabel.textContent = gameDayAbbrev(game);
         gridEl.appendChild(dayLabel);
         prevDayKey = dayKey;
         isFirstDay = false;
@@ -926,7 +932,7 @@
       meta.className = 'game-meta';
 
       var timeSpan = document.createElement('span');
-      timeSpan.textContent = (game.awayTbd || game.homeTbd) ? 'TBA' : (formatKickoff(game.date) || 'Time TBD');
+      timeSpan.textContent = (game.awayTbd || game.homeTbd || game.timeTbd) ? 'TBA' : (formatKickoff(game.date) || 'Time TBD');
       meta.appendChild(timeSpan);
 
       if (game.network) {
@@ -982,6 +988,25 @@
     }).format(new Date(ms)).toUpperCase();
   }
 
+  // For time-TBD games, ESPN's placeholder UTC timestamp shifts to the wrong calendar day once
+  // converted to Central Time -- so day-grouping for those games reads the UTC date directly instead.
+  function utcDateOnlyKey(isoString) {
+    return isoString.slice(0, 10);
+  }
+
+  function utcDayAbbrev(isoString) {
+    var noonUtc = new Date(isoString.slice(0, 10) + 'T12:00:00Z');
+    return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'short' }).format(noonUtc).toUpperCase();
+  }
+
+  function gameDayKey(game) {
+    return game.timeTbd ? utcDateOnlyKey(game.date) : ctDateKey(new Date(game.date).getTime());
+  }
+
+  function gameDayAbbrev(game) {
+    return game.timeTbd ? utcDayAbbrev(game.date) : ctDayAbbrev(new Date(game.date).getTime());
+  }
+
   function renderTimeline() {
     var GAP_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
 
@@ -1017,11 +1042,12 @@
     var isFirstDay = true;
 
     sortedMs.forEach(function (ms) {
-      var dayKey = ctDateKey(ms);
+      var repGame = groups[ms][0];
+      var dayKey = gameDayKey(repGame);
       if (dayKey !== prevDayKey) {
         var dayLabel = document.createElement('div');
         dayLabel.className = 'day-label' + (isFirstDay ? '' : ' day-label-sep');
-        dayLabel.textContent = ctDayAbbrev(ms);
+        dayLabel.textContent = gameDayAbbrev(repGame);
         timelineListEl.appendChild(dayLabel);
         prevDayKey = dayKey;
         prevMsInDay = null;
@@ -1034,7 +1060,7 @@
 
       var timeEl = document.createElement('div');
       timeEl.className = 'timeline-time';
-      timeEl.textContent = formatSlotTime(ms);
+      timeEl.textContent = repGame.timeTbd ? 'TBA' : formatSlotTime(ms);
       slot.appendChild(timeEl);
 
       var gamesWrap = document.createElement('div');
