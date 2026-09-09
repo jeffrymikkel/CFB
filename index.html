@@ -238,6 +238,10 @@
     padding: 4px 0;
   }
 
+  .team-row.reserve-mark {
+    padding-right: 38px;
+  }
+
   .team-logo {
     width: 36px;
     height: 36px;
@@ -331,22 +335,31 @@
     padding: 4px 14px;
   }
 
+  .timeline-day-label {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    padding: 10px 0 4px;
+  }
+
+  .timeline-day-label-sep {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
   .timeline-slot {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .timeline-slot:last-child {
-    border-bottom: none;
+    padding: 6px 0;
   }
 
   .timeline-slot-gap {
-    margin-top: 10px;
-    padding-top: 20px;
-    border-top: 2px solid var(--border);
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
   }
 
   .timeline-time {
@@ -579,9 +592,9 @@
     }
   }
 
-  function buildTeamRow(logoUrl, name, isTbd, scoreText, isWinner) {
+  function buildTeamRow(logoUrl, name, isTbd, scoreText, isWinner, reserveForMark) {
     var row = document.createElement('div');
-    row.className = 'team-row';
+    row.className = 'team-row' + (reserveForMark ? ' reserve-mark' : '');
 
     var img = document.createElement('img');
     img.className = 'team-logo' + (isTbd || !logoUrl ? ' placeholder' : '');
@@ -635,11 +648,11 @@
 
       card.appendChild(buildTeamRow(
         game.awayLogo, game.awayName, game.awayTbd,
-        game.isFinal ? game.awayScore : null, game.awayWinner
+        game.isFinal ? game.awayScore : null, game.awayWinner, true
       ));
       card.appendChild(buildTeamRow(
         game.homeLogo, game.homeName, game.homeTbd,
-        game.isFinal ? game.homeScore : null, game.homeWinner
+        game.isFinal ? game.homeScore : null, game.homeWinner, false
       ));
 
       var meta = document.createElement('div');
@@ -701,6 +714,23 @@
     }).format(new Date(ms));
   }
 
+  function ctDateKey(ms) {
+    // en-CA gives YYYY-MM-DD, which both identifies the CT calendar day and sorts correctly as a string.
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Chicago',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date(ms));
+  }
+
+  function ctDayAbbrev(ms) {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      weekday: 'short'
+    }).format(new Date(ms)).toUpperCase();
+  }
+
   function renderTimeline() {
     var GAP_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
 
@@ -722,12 +752,25 @@
     });
 
     var sortedMs = Object.keys(groups).map(Number).sort(function (a, b) { return a - b; });
-    var prevMs = null;
+    var prevDayKey = null;
+    var prevMsInDay = null;
+    var isFirstDay = true;
 
     sortedMs.forEach(function (ms) {
+      var dayKey = ctDateKey(ms);
+      if (dayKey !== prevDayKey) {
+        var dayLabel = document.createElement('div');
+        dayLabel.className = 'timeline-day-label' + (isFirstDay ? '' : ' timeline-day-label-sep');
+        dayLabel.textContent = ctDayAbbrev(ms);
+        timelineListEl.appendChild(dayLabel);
+        prevDayKey = dayKey;
+        prevMsInDay = null;
+        isFirstDay = false;
+      }
+
       var slot = document.createElement('div');
-      slot.className = 'timeline-slot' + (prevMs !== null && (ms - prevMs) >= GAP_THRESHOLD_MS ? ' timeline-slot-gap' : '');
-      prevMs = ms;
+      slot.className = 'timeline-slot' + (prevMsInDay !== null && (ms - prevMsInDay) >= GAP_THRESHOLD_MS ? ' timeline-slot-gap' : '');
+      prevMsInDay = ms;
 
       var timeEl = document.createElement('div');
       timeEl.className = 'timeline-time';
