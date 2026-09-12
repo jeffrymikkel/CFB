@@ -96,8 +96,26 @@
     pointer-events: none;
   }
 
-  #nav-menu {
+  #nav-refresh {
     margin-left: auto;
+  }
+
+  .refresh-icon {
+    display: inline-block;
+  }
+
+  #nav-refresh.spinning .refresh-icon {
+    animation: spin 0.7s linear infinite;
+  }
+
+  #nav-refresh.success {
+    color: #1a8f3c;
+    border-color: #1a8f3c;
+  }
+
+  #nav-refresh.error {
+    color: #b3261e;
+    border-color: #b3261e;
   }
 
   #sub-nav {
@@ -346,7 +364,7 @@
   }
 
   .tl-possession {
-    font-size: 14px;
+    font-size: 10px;
     line-height: 1;
   }
 
@@ -593,6 +611,7 @@
   <nav id="top-nav">
     <button id="nav-cfb" class="nav-btn active">CFB</button>
     <button id="nav-nfl" class="nav-btn">NFL</button>
+    <button id="nav-refresh" class="nav-btn" aria-label="Refresh scores"><span id="refresh-icon" class="refresh-icon">&#10227;</span></button>
     <button id="nav-menu" class="nav-btn">&#9776;</button>
   </nav>
   <div id="sub-nav">
@@ -710,6 +729,8 @@
     all: document.getElementById('subnav-all'),
     starred: document.getElementById('subnav-star')
   };
+  var refreshBtn = document.getElementById('nav-refresh');
+  var refreshIconEl = document.getElementById('refresh-icon');
   var menuBtn = document.getElementById('nav-menu');
   var menuOverlay = document.getElementById('menu-overlay');
   var menuCloseBtn = document.getElementById('menu-close-btn');
@@ -970,18 +991,18 @@
     }
     row.appendChild(img);
 
-    if (hasBall) {
-      var ball = document.createElement('span');
-      ball.className = 'tl-possession';
-      ball.textContent = '🏈';
-      row.appendChild(ball);
-    }
-
     if (scoreText !== null && scoreText !== undefined) {
       var scoreEl = document.createElement('div');
       scoreEl.className = 'tl-score';
       scoreEl.textContent = scoreText;
       row.appendChild(scoreEl);
+    }
+
+    if (hasBall) {
+      var ball = document.createElement('span');
+      ball.className = 'tl-possession';
+      ball.textContent = '🏈';
+      row.appendChild(ball);
     }
 
     return row;
@@ -1321,6 +1342,36 @@
   navBtns.nfl.addEventListener('click', function () { switchSport('nfl'); });
   subNavBtns.all.addEventListener('click', function () { switchCfbFilter('all'); });
   subNavBtns.starred.addEventListener('click', function () { switchCfbFilter('starred'); });
+
+  // ---- Refresh ----
+  function setRefreshState(state, icon) {
+    refreshBtn.className = 'nav-btn' + (state ? ' ' + state : '');
+    refreshIconEl.textContent = icon;
+  }
+
+  function triggerRefresh() {
+    if (refreshBtn.disabled) return;
+    refreshBtn.disabled = true;
+    setRefreshState('spinning', '⟳');
+
+    var task = isNflView() ? loadNflGames(nflWeekTabs[selectedNflIdx]) : loadCfbGames(cfbWeekTabs[selectedCfbIdx]);
+    task
+      .then(function () {
+        renderTimeline();
+        setRefreshState('success', '✓');
+      })
+      .catch(function () {
+        setRefreshState('error', '!');
+      })
+      .then(function () {
+        setTimeout(function () {
+          setRefreshState('', '⟳');
+          refreshBtn.disabled = false;
+        }, 900);
+      });
+  }
+
+  refreshBtn.addEventListener('click', triggerRefresh);
 
   // ---- Hamburger menu ----
   function renderMenuTeamList() {
