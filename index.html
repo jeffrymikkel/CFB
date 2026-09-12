@@ -368,6 +368,10 @@
     line-height: 1;
   }
 
+  .tl-possession-hidden {
+    visibility: hidden;
+  }
+
   .tl-status {
     flex-shrink: 0;
     display: flex;
@@ -996,11 +1000,11 @@
       scoreEl.className = 'tl-score';
       scoreEl.textContent = scoreText;
       row.appendChild(scoreEl);
-    }
 
-    if (hasBall) {
+      // Reserve the possession icon's width on every score row (hidden, not removed) so a
+      // team having the ball never shifts the status column's position relative to other cards.
       var ball = document.createElement('span');
-      ball.className = 'tl-possession';
+      ball.className = 'tl-possession' + (hasBall ? '' : ' tl-possession-hidden');
       ball.textContent = '🏈';
       row.appendChild(ball);
     }
