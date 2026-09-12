@@ -32,17 +32,17 @@ self.addEventListener('fetch', function (e) {
   // ESPN API — always network, never cache
   if (url.hostname === ESPN_ORIGIN) return;
 
-  // App shell — cache first, fall back to network
+  if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
+
+  // App shell — network first, so a new index.html shows up on the very next visit.
+  // Falls back to the last cached copy only when there's no connection.
   e.respondWith(
-    caches.match(e.request).then(function (cached) {
-      return cached || fetch(e.request).then(function (response) {
-        // Cache successful same-origin GET responses
-        if (e.request.method === 'GET' && url.origin === self.location.origin) {
-          var clone = response.clone();
-          caches.open(CACHE_NAME).then(function (cache) { cache.put(e.request, clone); });
-        }
-        return response;
-      });
+    fetch(e.request).then(function (response) {
+      var clone = response.clone();
+      caches.open(CACHE_NAME).then(function (cache) { cache.put(e.request, clone); });
+      return response;
+    }).catch(function () {
+      return caches.match(e.request);
     })
   );
 });
