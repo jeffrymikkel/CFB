@@ -1148,7 +1148,11 @@
   // ---- Fetching ----
   function buildScoreboardUrl(sport, tab) {
     var base = sport === 'nfl' ? NFL_API : CFB_API;
-    var url = base + '?limit=100';
+    var url = base + '?limit=200';
+    // Without groups=80 (FBS), ESPN's CFB scoreboard endpoint only returns a curated
+    // subset of ~25 "featured" games instead of the full weekly slate -- confirmed live
+    // this session (24 events without it vs. 86 with it, for the same week).
+    if (sport !== 'nfl') url += '&groups=80';
     if (tab) url += '&seasontype=' + tab.seasonType + '&week=' + tab.week;
     return url;
   }
