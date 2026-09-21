@@ -880,6 +880,11 @@
         network = competition.broadcasts[0].names.join('/');
       }
 
+      var spreadDetails = null;
+      if (competition.odds && competition.odds.length > 0 && competition.odds[0].details) {
+        spreadDetails = competition.odds[0].details;
+      }
+
       var statusObj = competition.status || {};
       var statusType = statusObj.type || {};
       var state = statusType.state || 'pre';
@@ -924,7 +929,9 @@
         homeLogo: homeTbd ? null : (home.team.logo || null),
         homeScore: home.score,
         homeWinner: !!home.winner,
-        network: network
+        network: network,
+        sport: sport,
+        spread: spreadDetails
       };
     } catch (e) {
       return null;
@@ -1032,6 +1039,12 @@
       line2.textContent = game.displayClock || '';
       wrap.appendChild(line2);
     } else {
+      if (game.sport === 'cfb' && game.spread) {
+        var spreadLine = document.createElement('div');
+        spreadLine.className = 'tl-status-line';
+        spreadLine.textContent = game.spread;
+        wrap.appendChild(spreadLine);
+      }
       var netLine = document.createElement('div');
       netLine.className = 'tl-status-sub';
       netLine.textContent = game.network || 'TBD';
