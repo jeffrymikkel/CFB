@@ -370,6 +370,10 @@
     min-width: 1.2em;
   }
 
+  .tl-score.loser {
+    color: #555555;
+  }
+
   .tl-possession {
     font-size: 10px;
     line-height: 1;
@@ -627,8 +631,7 @@
   }
 
   .gs-score.dim {
-    color: var(--text-muted);
-    font-weight: 700;
+    color: #555555;
   }
 
   .gs-dash {
@@ -1661,7 +1664,16 @@
     return cfbFilter === 'starred' ? cfbGames.filter(function (g) { return isMarked(g.eventId); }) : cfbGames;
   }
 
-  function buildTeamLine(logoUrl, isTbd, scoreText, hasBall) {
+  // Which side lost a finished game (null for ties or games that aren't final yet).
+  function finalLoserSide(game) {
+    if (!game.isFinal) return null;
+    var a = parseInt(game.awayScore, 10);
+    var hm = parseInt(game.homeScore, 10);
+    if (isNaN(a) || isNaN(hm) || a === hm) return null;
+    return a < hm ? 'away' : 'home';
+  }
+
+  function buildTeamLine(logoUrl, isTbd, scoreText, hasBall, isLoser) {
     var row = document.createElement('div');
     row.className = 'tl-team';
 
@@ -1678,7 +1690,7 @@
 
     if (scoreText !== null && scoreText !== undefined) {
       var scoreEl = document.createElement('div');
-      scoreEl.className = 'tl-score';
+      scoreEl.className = 'tl-score' + (isLoser ? ' loser' : '');
       scoreEl.textContent = scoreText;
       row.appendChild(scoreEl);
 
@@ -1759,11 +1771,13 @@
     teamsWrap.className = 'tl-teams';
     teamsWrap.appendChild(buildTeamLine(
       game.awayLogo, game.awayTbd, showScore ? game.awayScore : null,
-      game.state === 'in' && game.possession !== null && game.possession === game.awayTeamId
+      game.state === 'in' && game.possession !== null && game.possession === game.awayTeamId,
+      finalLoserSide(game) === 'away'
     ));
     teamsWrap.appendChild(buildTeamLine(
       game.homeLogo, game.homeTbd, showScore ? game.homeScore : null,
-      game.state === 'in' && game.possession !== null && game.possession === game.homeTeamId
+      game.state === 'in' && game.possession !== null && game.possession === game.homeTeamId,
+      finalLoserSide(game) === 'home'
     ));
     card.appendChild(teamsWrap);
 
@@ -2175,11 +2189,10 @@
       return mid;
     }
     var row = mk('div', 'gs-scorerow');
-    var awayWin = g.isFinal && g.awayWinner;
-    var homeWin = g.isFinal && g.homeWinner;
-    row.appendChild(mk('span', 'gs-score' + (g.isFinal && !awayWin ? ' dim' : ''), g.awayScore !== undefined && g.awayScore !== null ? String(g.awayScore) : '0'));
+    var loserSide = finalLoserSide(g);
+    row.appendChild(mk('span', 'gs-score' + (loserSide === 'away' ? ' dim' : ''), g.awayScore !== undefined && g.awayScore !== null ? String(g.awayScore) : '0'));
     row.appendChild(mk('span', 'gs-dash', '–'));
-    row.appendChild(mk('span', 'gs-score' + (g.isFinal && !homeWin ? ' dim' : ''), g.homeScore !== undefined && g.homeScore !== null ? String(g.homeScore) : '0'));
+    row.appendChild(mk('span', 'gs-score' + (loserSide === 'home' ? ' dim' : ''), g.homeScore !== undefined && g.homeScore !== null ? String(g.homeScore) : '0'));
     mid.appendChild(row);
 
     if (g.isFinal) {
