@@ -1498,6 +1498,22 @@
     return (period - 4) + 'OT';
   }
 
+  // ESPN occasionally leaves a game flagged "in progress" with a frozen clock after the last logged
+  // play is "End of 2nd quarter" (it never flips the status to Halftime). Spot that case and show
+  // the break instead of a clock that isn't running. Real halftime uses ESPN's own STATUS_HALFTIME.
+  function periodBreakLabel(play, period) {
+    if (!play || !period) return null;
+    var type = (play.type && play.type.text) || '';
+    var m = /^End of (1st|2nd|3rd|4th|first|second|third|fourth)/i.exec(play.text || '');
+    if (!/End Period/i.test(type) && !m) return null;
+    var ords = { '1st': 1, first: 1, '2nd': 2, second: 2, '3rd': 3, third: 3, '4th': 4, fourth: 4 };
+    var ord = m ? ords[m[1].toLowerCase()] : (play.period && play.period.number);
+    if (!ord || ord !== period) return null;
+    if (ord === 2) return 'Halftime';
+    if (ord === 1 || ord === 3) return 'End Q' + ord;
+    return null;
+  }
+
   // ---- Extraction (shared by CFB and NFL) ----
   function extractGame(event, sport) {
     try {
@@ -1544,6 +1560,10 @@
       var homeRank = (home.curatedRank && typeof home.curatedRank.current === 'number' && home.curatedRank.current < 99) ? home.curatedRank.current : null;
 
       var situation = competition.situation || {};
+      var breakLabel = null;
+      if (state === 'in') {
+        breakLabel = statusType.name === 'STATUS_HALFTIME' ? 'Halftime' : periodBreakLabel(situation.lastPlay, statusObj.period);
+      }
       var venueName = competition.venue && competition.venue.fullName ? competition.venue.fullName : null;
 
       return {
@@ -1575,6 +1595,7 @@
         sport: sport,
         spread: spreadDetails,
         venue: venueName,
+        breakLabel: breakLabel,
         awayRecord: competitorRecord(away),
         homeRecord: competitorRecord(home),
         awayLinescores: lineScoreValues(away.linescores),
@@ -1684,13 +1705,15 @@
     } else if (game.state === 'in') {
       var line1 = document.createElement('div');
       line1.className = 'tl-status-line';
-      line1.textContent = periodLabel(game.period);
+      line1.textContent = game.breakLabel || periodLabel(game.period);
       wrap.appendChild(line1);
 
-      var line2 = document.createElement('div');
-      line2.className = 'tl-status-sub';
-      line2.textContent = game.displayClock || '';
-      wrap.appendChild(line2);
+      if (!game.breakLabel) {
+        var line2 = document.createElement('div');
+        line2.className = 'tl-status-sub';
+        line2.textContent = game.displayClock || '';
+        wrap.appendChild(line2);
+      }
     } else {
       wrap.classList.add('pre');
       var whenLine = document.createElement('div');
@@ -2037,6 +2060,17 @@
     if (type.state) { g.state = type.state; g.isFinal = type.state === 'post'; }
     if (typeof status.period === 'number') g.period = status.period;
     if (status.displayClock) g.displayClock = status.displayClock;
+    g.breakLabel = null;
+    if (g.state === 'in') {
+      if (type.name === 'STATUS_HALFTIME') {
+        g.breakLabel = 'Halftime';
+      } else {
+        var drives = (data.drives && data.drives.previous ? data.drives.previous : []).concat(data.drives && data.drives.current ? [data.drives.current] : []);
+        var lastDrive = drives[drives.length - 1];
+        var lastPlay = lastDrive && lastDrive.plays && lastDrive.plays[lastDrive.plays.length - 1];
+        g.breakLabel = periodBreakLabel(lastPlay, g.period);
+      }
+    }
     (comp.competitors || []).forEach(function (c) {
       var side = c.homeAway === 'home' ? 'home' : (c.homeAway === 'away' ? 'away' : null);
       if (!side) return;
@@ -2151,7 +2185,7 @@
     if (g.isFinal) {
       mid.appendChild(mk('div', 'gs-status', g.period && g.period > 4 ? 'Final/' + periodLabel(g.period) : 'Final'));
     } else {
-      mid.appendChild(mk('div', 'gs-status live', periodLabel(g.period) + (g.displayClock ? ' · ' + g.displayClock : '')));
+      mid.appendChild(mk('div', 'gs-status live', g.breakLabel || (periodLabel(g.period) + (g.displayClock ? ' · ' + g.displayClock : ''))));
     }
     if (g.network) mid.appendChild(mk('div', 'gs-sub', g.network));
     return mid;
@@ -2418,7 +2452,7 @@
   }
 
   function buildCurrentDrive(g, summary) {
-    if (g.state !== 'in') return null;
+    if (g.state !== 'in' || g.breakLabel) return null;
     var cur = summary && summary.drives && summary.drives.current;
     if (!cur) return null;
     var plays = cur.plays || [];
