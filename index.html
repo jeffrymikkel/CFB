@@ -2373,9 +2373,9 @@
     var hStats = map.home.statistics || [];
     if (!aStats.length) return null;
 
-    var awayHex = g.awayColor && /^[0-9a-f]{6}$/i.test(g.awayColor) ? '#' + g.awayColor : '#7a8699';
+    // Away team is always grey; home team gets its school color.
+    var awayHex = '#9aa0a8';
     var homeHex = g.homeColor && /^[0-9a-f]{6}$/i.test(g.homeColor) ? '#' + g.homeColor : '#1f3a6e';
-    if (awayHex.toLowerCase() === homeHex.toLowerCase()) homeHex = '#1a1a1a';
 
     var card = sectionCard('Team Stats');
     var head = mk('div', 'ts2-head');
