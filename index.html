@@ -2175,6 +2175,7 @@
     if (!venueName && g.venue) venueName = g.venue;
     if (venueName) {
       var loc = venue && venue.address ? [venue.address.city, venue.address.state].filter(Boolean).join(', ') : '';
+      if (venue && venue.address && venue.address.city && venueName.indexOf(venue.address.city) !== -1) loc = '';
       rows.push(['Venue', venueName + (loc ? ' – ' + loc : '')]);
     }
     if (g.network) rows.push(['TV', g.network]);
@@ -2457,7 +2458,8 @@
       }
 
       var rows = mine.entries.map(function (e) {
-        var conf = statDisplay(e, function (s) { return s.type === 'vsconf' || s.type === 'vsdiv' || /^vs\.?\s*(conf|div)/i.test(s.name || ''); });
+        var wantType = st.sport === 'nfl' ? 'vsdiv' : 'vsconf';
+        var conf = statDisplay(e, function (s) { return s.type === wantType; });
         var overall = statDisplay(e, function (s) { return s.name === 'overall' || s.type === 'total'; });
         return { e: e, conf: conf, overall: overall, c: parseRecord(conf), o: parseRecord(overall) };
       });
