@@ -936,6 +936,88 @@
     font-weight: 800;
   }
 
+  .day-divider {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0 0;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  .day-divider::before,
+  .day-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Current drive card */
+  .gd-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .gd-logo {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .gd-title {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .gd-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .gd-stats {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 6px;
+  }
+
+  .gd-stat {
+    flex: 1;
+    max-width: 50%;
+    text-align: center;
+    padding: 0 8px;
+  }
+
+  .gd-stat + .gd-stat {
+    border-left: 1px solid var(--border);
+  }
+
+  .gd-stat-k {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .gd-stat-v {
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .gd-field {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 4px;
+  }
+
   /* Hamburger menu overlay */
   .menu-overlay {
     position: fixed;
@@ -1452,6 +1534,8 @@
         homeRecord: competitorRecord(home),
         awayLinescores: lineScoreValues(away.linescores),
         homeLinescores: lineScoreValues(home.linescores),
+        awayShort: away.team.shortDisplayName || away.team.location || '',
+        homeShort: home.team.shortDisplayName || home.team.location || '',
         awayColor: away.team.color || null,
         homeColor: home.team.color || null,
         awayConfId: away.team.conferenceId ? String(away.team.conferenceId) : null,
@@ -1666,7 +1750,18 @@
 
     var grid = document.createElement('div');
     grid.className = 'tl-grid';
+    var prevDay = null;
     sorted.forEach(function (game) {
+      var dayKey = gameDayKey(game);
+      if (dayKey !== prevDay) {
+        var divider = document.createElement('div');
+        divider.className = 'day-divider';
+        var dayText = document.createElement('span');
+        dayText.textContent = titleCase(gameDayAbbrev(game));
+        divider.appendChild(dayText);
+        grid.appendChild(divider);
+        prevDay = dayKey;
+      }
       grid.appendChild(buildTimelineCard(game, showStar));
     });
     timelineListEl.appendChild(grid);
@@ -1911,10 +2006,12 @@
     if (g.state !== 'pre') {
       var ls = buildLineScore(g);
       if (ls) body.appendChild(ls);
-      var plays = buildScoringPlays(g, s);
-      if (plays) body.appendChild(plays);
+      var drive = buildCurrentDrive(g, s);
+      if (drive) body.appendChild(drive);
       var stats = buildTeamStats(g, s);
       if (stats) body.appendChild(stats);
+      var plays = buildScoringPlays(g, s);
+      if (plays) body.appendChild(plays);
       var leaders = buildLeaders(g, s);
       if (leaders) body.appendChild(leaders);
       if (!ls && !stats && !leaders) {
@@ -2167,6 +2264,140 @@
     return any ? card : null;
   }
 
+  function svgEl(name, attrs) {
+    var n = document.createElementNS('http://www.w3.org/2000/svg', name);
+    Object.keys(attrs || {}).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    return n;
+  }
+
+  function fieldColor(hex, fallback) {
+    return hex && /^[0-9a-f]{6}$/i.test(hex) ? '#' + hex : fallback;
+  }
+
+  // ESPN's yardLine is the distance from the HOME team's goal line, so with the away team's end
+  // zone drawn on the left, a ball at yardLine Y sits (100 - Y) yards in from the left goal line.
+  function buildDriveField(g, offenseSide, startX, endX, fdX, lastYards) {
+    var W = 700, H = 150, ezw = W / 12, fw = W - 2 * ezw, top = 18, bottom = 122, lineY = 96;
+    function px(yards) { return ezw + fw * yards / 100; }
+
+    var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, 'class': 'gd-field', role: 'img', 'aria-label': 'Current drive field position' });
+    svg.appendChild(svgEl('rect', { x: 0, y: top, width: W, height: bottom - top, fill: '#f3f3f3' }));
+    for (var i = 0; i < 10; i++) {
+      if (i % 2 === 0) svg.appendChild(svgEl('rect', { x: px(i * 10), y: top, width: fw / 10, height: bottom - top, fill: '#e8e8e8' }));
+    }
+    for (var j = 1; j < 10; j++) {
+      svg.appendChild(svgEl('line', { x1: px(j * 10), y1: top, x2: px(j * 10), y2: bottom, stroke: j === 5 ? '#bdbdbd' : '#d6d6d6', 'stroke-width': j === 5 ? 2 : 1 }));
+      var num = svgEl('text', { x: px(j * 10), y: 141, 'text-anchor': 'middle', 'font-size': 12, fill: '#8a8a8a', 'font-weight': 600 });
+      num.textContent = String((j <= 5 ? j : 10 - j) * 10);
+      svg.appendChild(num);
+    }
+
+    [['away', 0], ['home', W - ezw]].forEach(function (z) {
+      var side = z[0];
+      svg.appendChild(svgEl('rect', { x: z[1], y: top, width: ezw, height: bottom - top, fill: fieldColor(g[side + 'Color'], '#777777') }));
+      var label = String(g[side + 'Short'] || g[side + 'Abbr'] || '').toUpperCase();
+      var fs = label.length > 11 ? 10 : (label.length > 8 ? 12 : 14);
+      var t = svgEl('text', {
+        transform: 'translate(' + (z[1] + ezw / 2) + ',' + ((top + bottom) / 2) + ') rotate(' + (side === 'away' ? -90 : 90) + ')',
+        'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs, 'font-weight': 800, 'letter-spacing': 1.5, fill: '#ffffff'
+      });
+      t.textContent = label;
+      svg.appendChild(t);
+    });
+
+    // First-down marker
+    if (fdX !== null) {
+      svg.appendChild(svgEl('line', { x1: px(fdX), y1: top + 4, x2: px(fdX), y2: bottom - 4, stroke: '#f2c200', 'stroke-width': 4, 'stroke-linecap': 'round' }));
+    }
+
+    // Drive line
+    svg.appendChild(svgEl('line', { x1: px(startX), y1: lineY, x2: px(endX), y2: lineY, stroke: '#222222', 'stroke-width': 3, 'stroke-linecap': 'round' }));
+    svg.appendChild(svgEl('circle', { cx: px(startX), cy: lineY, r: 4, fill: '#222222' }));
+
+    // Ball marker (team logo in a pin)
+    var cx = px(endX);
+    var pin = svgEl('g', { transform: 'translate(' + cx + ',' + lineY + ')' });
+    pin.appendChild(svgEl('path', {
+      d: 'M0,0 C-7,-12 -21,-20 -21,-34 A21,21 0 1 1 21,-34 C21,-20 7,-12 0,0 Z',
+      fill: '#ffffff', stroke: '#9a9a9a', 'stroke-width': 2
+    }));
+    var logo = g[offenseSide + 'Logo'];
+    if (logo) {
+      var img = svgEl('image', { x: -14, y: -48, width: 28, height: 28, href: logo, preserveAspectRatio: 'xMidYMid meet' });
+      pin.appendChild(img);
+    }
+    svg.appendChild(pin);
+
+    if (lastYards) {
+      var lx = Math.max(44, Math.min(W - 44, cx));
+      var txt = (lastYards > 0 ? '+' : '') + lastYards + ' Yds';
+      svg.appendChild(svgEl('rect', { x: lx - 30, y: lineY + 8, width: 60, height: 18, rx: 4, fill: '#ffffff', stroke: '#c9c9c9' }));
+      var lt = svgEl('text', { x: lx, y: lineY + 21, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#444444' });
+      lt.textContent = txt;
+      svg.appendChild(lt);
+    }
+    return svg;
+  }
+
+  function buildCurrentDrive(g, summary) {
+    if (g.state !== 'in') return null;
+    var cur = summary && summary.drives && summary.drives.current;
+    if (!cur) return null;
+    var plays = cur.plays || [];
+    var last = null;
+    for (var i = plays.length - 1; i >= 0; i--) {
+      if (plays[i] && plays[i].end && typeof plays[i].end.yardLine === 'number') { last = plays[i]; break; }
+    }
+    if (!last) return null;
+
+    var endYl = last.end.yardLine;
+    var startYl = cur.start && typeof cur.start.yardLine === 'number' ? cur.start.yardLine : endYl;
+    var offenseId = String((last.end.team && last.end.team.id) || (cur.team && cur.team.id) || '');
+    var offenseSide = offenseId === String(g.homeTeamId) ? 'home' : (offenseId === String(g.awayTeamId) ? 'away' : null);
+    if (!offenseSide) return null;
+
+    var startX = 100 - startYl;
+    var endX = 100 - endYl;
+    var dir = offenseSide === 'away' ? 1 : -1;
+    var fdX = null;
+    if (last.end.down >= 1 && typeof last.end.distance === 'number') {
+      fdX = Math.max(0, Math.min(100, endX + dir * last.end.distance));
+    }
+    var lastType = last.type && last.type.text ? last.type.text : '';
+    var lastYards = (typeof last.statYardage === 'number' && !/Kickoff|End Period|End of|Timeout|Punt/i.test(lastType)) ? last.statYardage : 0;
+
+    var card = sectionCard(null);
+    card.classList.add('gd-card');
+    var head = mk('div', 'gd-head');
+    head.appendChild(mkLogo(g[offenseSide + 'Logo'] || teamLogoUrl(cur.team), 'gd-logo'));
+    var titles = mk('div', 'gd-titles');
+    titles.appendChild(mk('div', 'gd-title', 'Current Drive'));
+    if (cur.description) titles.appendChild(mk('div', 'gd-sub', cur.description));
+    head.appendChild(titles);
+    card.appendChild(head);
+
+    var down = last.end.shortDownDistanceText || '';
+    var ball = last.end.possessionText || '';
+    if (down || ball) {
+      var row = mk('div', 'gd-stats');
+      if (down) {
+        var c1 = mk('div', 'gd-stat');
+        c1.appendChild(mk('div', 'gd-stat-k', 'Down:'));
+        c1.appendChild(mk('div', 'gd-stat-v', down));
+        row.appendChild(c1);
+      }
+      if (ball) {
+        var c2 = mk('div', 'gd-stat');
+        c2.appendChild(mk('div', 'gd-stat-k', 'Ball on:'));
+        c2.appendChild(mk('div', 'gd-stat-v', ball));
+        row.appendChild(c2);
+      }
+      card.appendChild(row);
+    }
+    card.appendChild(buildDriveField(g, offenseSide, startX, endX, fdX, lastYards));
+    return card;
+  }
+
   function buildGameInfo(g, summary) {
     var rows = [];
     var gi = summary && summary.gameInfo;
@@ -2322,6 +2553,7 @@
       game[side + 'Rank'] = null;
       game[side + 'Name'] = t.displayName || t.name || '';
       game[side + 'Abbr'] = t.abbreviation || '';
+      game[side + 'Short'] = t.shortDisplayName || t.location || '';
       game[side + 'Logo'] = teamLogoUrl(t);
       game[side + 'Score'] = scoreText(c.score);
       game[side + 'Winner'] = !!c.winner;
