@@ -2324,9 +2324,10 @@
 
   function statNumber(stat, kind) {
     if (!stat || stat.displayValue === undefined || stat.displayValue === null) return null;
-    var d = String(stat.displayValue);
+    var d = String(stat.displayValue).replace(/^\s+|\s+$/g, '');
     var m;
     if (kind === 'time') {
+      if (typeof stat.value === 'number' && stat.value >= 0) return stat.value;
       m = d.match(/^(\d+):(\d+)$/);
       return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null;
     }
@@ -2346,7 +2347,7 @@
 
   function statDisplayFor(list, row) {
     var st = statByName(list, row.names);
-    if (st && st.displayValue !== undefined && st.displayValue !== '') return { text: String(st.displayValue), num: statNumber(st, row.kind) };
+    if (st && st.displayValue !== undefined && st.displayValue !== '') return { text: String(st.displayValue).replace(/^\s+|\s+$/g, ''), num: statNumber(st, row.kind) };
     if (row.computeFrom) {
       var y = statByName(list, [row.computeFrom[0]]);
       var c = statByName(list, [row.computeFrom[1]]);
