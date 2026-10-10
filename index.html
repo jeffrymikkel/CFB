@@ -2374,15 +2374,18 @@
     if (!aStats.length) return null;
 
     // Away team is always grey; home team gets its school color.
-    var awayHex = '#9aa0a8';
+    var awayHex = '#c3c7cd';
     var homeHex = g.homeColor && /^[0-9a-f]{6}$/i.test(g.homeColor) ? '#' + g.homeColor : '#1f3a6e';
+    var hn = parseInt(homeHex.slice(1), 16);
+    var lum = (0.299 * ((hn >> 16) & 255) + 0.587 * ((hn >> 8) & 255) + 0.114 * (hn & 255)) / 255;
+    if (lum > 0.62) homeHex = '#1a1a1a'; // too light to stand apart from the grey
 
     var card = sectionCard('Team Stats');
     var head = mk('div', 'ts2-head');
     var hl = mk('div', 'ts2-team');
     hl.appendChild(mkLogo(g.awayLogo, 'ts2-logo'));
-    var hlKey = mk('span', 'ts2-key hatch');
-    hlKey.style.setProperty('--c', awayHex);
+    var hlKey = mk('span', 'ts2-key');
+    hlKey.style.background = awayHex;
     hl.appendChild(hlKey);
     hl.appendChild(mk('span', 'ts2-abbr', g.awayAbbr || g.awayShort || ''));
     var hr = mk('div', 'ts2-team right');
@@ -2416,8 +2419,8 @@
       pct = Math.max(0, Math.min(100, pct));
       var bar = mk('div', 'ts2-bar');
       bar.style.background = homeHex;
-      var fill = mk('div', 'ts2-fill hatch');
-      fill.style.setProperty('--c', awayHex);
+      var fill = mk('div', 'ts2-fill');
+      fill.style.background = awayHex;
       fill.style.width = pct + '%';
       bar.appendChild(fill);
       wrap.appendChild(bar);
