@@ -1251,6 +1251,22 @@
     color: var(--text-muted);
     padding: 4px 6px;
   }
+
+  /* Team stats bars */
+  .ts2-head { display:flex; justify-content:space-between; align-items:center; padding:10px 0 4px; }
+  .ts2-team { display:flex; align-items:center; gap:8px; }
+  .ts2-logo { width:40px; height:40px; object-fit:contain; }
+  .ts2-abbr { font-size:12px; font-weight:700; color:var(--text-muted); }
+  .ts2-key { width:12px; height:12px; border-radius:2px; display:inline-block; }
+  .hatch { background-image: repeating-linear-gradient(135deg, var(--c) 0 1.5px, transparent 1.5px 3.5px); }
+  .ts2-key.hatch { border:1px solid var(--c); }
+  .ts2-row { padding:10px 0 4px; }
+  .ts2-line { display:grid; grid-template-columns:1fr auto 1fr; align-items:baseline; gap:6px; }
+  .ts2-val { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .ts2-val.right { text-align:right; }
+  .ts2-label { font-size:13px; font-weight:800; text-align:center; }
+  .ts2-bar { height:7px; border-radius:4px; overflow:hidden; margin-top:6px; }
+  .ts2-fill { height:100%; }
 </style>
 </head>
 <body>
@@ -1605,6 +1621,8 @@
         homeLinescores: lineScoreValues(home.linescores),
         awayShort: away.team.shortDisplayName || away.team.location || '',
         homeShort: home.team.shortDisplayName || home.team.location || '',
+        awayAbbr: away.team.abbreviation || '',
+        homeAbbr: home.team.abbreviation || '',
         awayColor: away.team.color || null,
         homeColor: home.team.color || null,
         awayConfId: away.team.conferenceId ? String(away.team.conferenceId) : null,
@@ -2132,10 +2150,10 @@
     if (g.state !== 'pre') {
       var ls = buildLineScore(g);
       if (ls) body.appendChild(ls);
-      var drive = buildCurrentDrive(g, s);
-      if (drive) body.appendChild(drive);
       var stats = buildTeamStats(g, s);
       if (stats) body.appendChild(stats);
+      var drive = buildCurrentDrive(g, s);
+      if (drive) body.appendChild(drive);
       var plays = buildScoringPlays(g, s);
       if (plays) body.appendChild(plays);
       var leaders = buildLeaders(g, s);
@@ -2281,8 +2299,66 @@
     return card;
   }
 
-  var SUB_STAT_NAMES = ['thirdDownEff', 'fourthDownEff', 'completionAttempts', 'yardsPerPass',
-    'interceptions', 'rushingAttempts', 'yardsPerRush', 'fumblesLost'];
+  // Team stats shown as head-to-head bars, in this order.
+  var STAT_ROWS = [
+    { label: 'Total Yards', names: ['totalYards'], kind: 'num' },
+    { label: 'Passing Yards', names: ['netPassingYards', 'passingYards'], kind: 'num' },
+    { label: 'Rushing Yards', names: ['rushingYards'], kind: 'num' },
+    { label: '1st Downs', names: ['firstDowns'], kind: 'num' },
+    { label: 'Penalties', names: ['totalPenaltiesYards'], kind: 'second' },
+    { label: '3rd Down', names: ['thirdDownEff'], kind: 'frac' },
+    { label: '4th Down', names: ['fourthDownEff'], kind: 'frac' },
+    { label: 'Possession', names: ['possessionTime'], kind: 'time' },
+    { label: 'Yards Per Rush', names: ['yardsPerRushAttempt'], kind: 'num', computeFrom: ['rushingYards', 'rushingAttempts'] },
+    { label: 'Turnovers', names: ['turnovers'], kind: 'num' }
+  ];
+
+  function statByName(list, names) {
+    for (var n = 0; n < names.length; n++) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].name === names[n]) return list[i];
+      }
+    }
+    return null;
+  }
+
+  function statNumber(stat, kind) {
+    if (!stat || stat.displayValue === undefined || stat.displayValue === null) return null;
+    var d = String(stat.displayValue);
+    var m;
+    if (kind === 'time') {
+      m = d.match(/^(\d+):(\d+)$/);
+      return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null;
+    }
+    if (kind === 'second') {
+      m = d.match(/^(\d+)\s*[-\/]\s*(\d+)$/);
+      return m ? parseInt(m[2], 10) : null;
+    }
+    if (kind === 'frac') {
+      m = d.match(/^(\d+)\s*[-\/]\s*(\d+)$/);
+      if (!m) return null;
+      var att = parseInt(m[2], 10);
+      return att ? parseInt(m[1], 10) / att : 0;
+    }
+    var v = parseFloat(d.replace(/,/g, ''));
+    return isNaN(v) ? null : v;
+  }
+
+  function statDisplayFor(list, row) {
+    var st = statByName(list, row.names);
+    if (st && st.displayValue !== undefined && st.displayValue !== '') return { text: String(st.displayValue), num: statNumber(st, row.kind) };
+    if (row.computeFrom) {
+      var y = statByName(list, [row.computeFrom[0]]);
+      var c = statByName(list, [row.computeFrom[1]]);
+      var yv = y ? parseFloat(y.displayValue) : NaN;
+      var cv = c ? parseFloat(c.displayValue) : NaN;
+      if (!isNaN(yv) && !isNaN(cv) && cv > 0) {
+        var avg = yv / cv;
+        return { text: avg.toFixed(1), num: avg };
+      }
+    }
+    return null;
+  }
 
   function buildTeamStats(g, summary) {
     var teams = summary.boxscore && summary.boxscore.teams;
@@ -2297,38 +2373,57 @@
     var hStats = map.home.statistics || [];
     if (!aStats.length) return null;
 
-    var card = sectionCard('Team Stats');
-    var table = mk('table', 'gs-table gs-stats');
-    var thead = mk('thead');
-    var hr = mk('tr');
-    hr.appendChild(mk('th', 'gs-th-team', ''));
-    var ha = mk('th');
-    ha.appendChild(mkLogo(g.awayLogo, 'gs-mini-logo'));
-    var hh = mk('th');
-    hh.appendChild(mkLogo(g.homeLogo, 'gs-mini-logo'));
-    hr.appendChild(ha);
-    hr.appendChild(hh);
-    thead.appendChild(hr);
-    table.appendChild(thead);
+    var awayHex = g.awayColor && /^[0-9a-f]{6}$/i.test(g.awayColor) ? '#' + g.awayColor : '#7a8699';
+    var homeHex = g.homeColor && /^[0-9a-f]{6}$/i.test(g.homeColor) ? '#' + g.homeColor : '#1f3a6e';
+    if (awayHex.toLowerCase() === homeHex.toLowerCase()) homeHex = '#1a1a1a';
 
-    var tbody = mk('tbody');
-    aStats.forEach(function (stat, i) {
-      var other = hStats[i] && hStats[i].name === stat.name ? hStats[i] : null;
-      if (!other) {
-        for (var k = 0; k < hStats.length; k++) {
-          if (hStats[k].name === stat.name) { other = hStats[k]; break; }
-        }
+    var card = sectionCard('Team Stats');
+    var head = mk('div', 'ts2-head');
+    var hl = mk('div', 'ts2-team');
+    hl.appendChild(mkLogo(g.awayLogo, 'ts2-logo'));
+    var hlKey = mk('span', 'ts2-key hatch');
+    hlKey.style.setProperty('--c', awayHex);
+    hl.appendChild(hlKey);
+    hl.appendChild(mk('span', 'ts2-abbr', g.awayAbbr || g.awayShort || ''));
+    var hr = mk('div', 'ts2-team right');
+    hr.appendChild(mk('span', 'ts2-abbr', g.homeAbbr || g.homeShort || ''));
+    var hrKey = mk('span', 'ts2-key');
+    hrKey.style.background = homeHex;
+    hr.appendChild(hrKey);
+    hr.appendChild(mkLogo(g.homeLogo, 'ts2-logo'));
+    head.appendChild(hl);
+    head.appendChild(hr);
+    card.appendChild(head);
+
+    var any = false;
+    STAT_ROWS.forEach(function (row) {
+      var a = statDisplayFor(aStats, row);
+      var h = statDisplayFor(hStats, row);
+      if (!a || !h) return;
+      any = true;
+      var wrap = mk('div', 'ts2-row');
+      var line = mk('div', 'ts2-line');
+      line.appendChild(mk('span', 'ts2-val', a.text));
+      line.appendChild(mk('span', 'ts2-label', row.label));
+      line.appendChild(mk('span', 'ts2-val right', h.text));
+      wrap.appendChild(line);
+
+      var pct = 50;
+      if (a.num !== null && h.num !== null) {
+        var tot = a.num + h.num;
+        pct = tot > 0 ? (a.num / tot) * 100 : 50;
       }
-      var isSub = SUB_STAT_NAMES.indexOf(stat.name) !== -1;
-      var tr = mk('tr', isSub ? 'sub' : 'main');
-      tr.appendChild(mk('td', 'gs-th-team', stat.label || stat.name || ''));
-      tr.appendChild(mk('td', null, stat.displayValue !== undefined ? String(stat.displayValue) : ''));
-      tr.appendChild(mk('td', null, other && other.displayValue !== undefined ? String(other.displayValue) : ''));
-      tbody.appendChild(tr);
+      pct = Math.max(0, Math.min(100, pct));
+      var bar = mk('div', 'ts2-bar');
+      bar.style.background = homeHex;
+      var fill = mk('div', 'ts2-fill hatch');
+      fill.style.setProperty('--c', awayHex);
+      fill.style.width = pct + '%';
+      bar.appendChild(fill);
+      wrap.appendChild(bar);
+      card.appendChild(wrap);
     });
-    table.appendChild(tbody);
-    card.appendChild(table);
-    return card;
+    return any ? card : null;
   }
 
   var LEADER_CATS = [
