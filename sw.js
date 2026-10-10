@@ -1,4 +1,4 @@
-var CACHE_NAME = 'bspn-v1';
+var CACHE_NAME = 'bspn-v2';
 var APP_SHELL = [
   '/CFB/',
   '/CFB/index.html'

@@ -422,6 +422,520 @@
     background: #fff8ea;
   }
 
+  /* Game tiles: flat chronological grid */
+  .tl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .tl-card-link {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tl-card-link:active {
+    background: #eaecf0;
+  }
+
+  .tl-card .tl-status {
+    flex: 1;
+    min-width: 0;
+    padding-right: 18px;
+  }
+
+  .tl-status-when {
+    white-space: normal;
+  }
+
+  /* Full-screen pop-up pages */
+  body.sheet-open {
+    overflow: hidden;
+  }
+
+  .sheet {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    background: var(--bg);
+  }
+
+  .sheet-bar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 12px 0;
+    padding-top: calc(8px + env(safe-area-inset-top));
+    height: 0;
+    overflow: visible;
+  }
+
+  .sheet-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 28px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    color: var(--text);
+  }
+
+  .sheet-body {
+    padding: 0 12px 40px;
+    padding-top: calc(8px + env(safe-area-inset-top));
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .sheet-note {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 24px 16px;
+  }
+
+  .sheet-retry {
+    margin-top: 12px;
+    padding: 8px 16px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* Box score header */
+  .gs-head {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: start;
+    gap: 4px;
+    padding: 44px 0 14px;
+  }
+
+  .gs-team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 4px 10px;
+    border: none;
+    border-radius: 16px;
+    background: transparent;
+    min-width: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .gs-logo {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+  }
+
+  .gs-name {
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .gs-rank {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+
+  .gs-record {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .gs-mid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding-top: 26px;
+    min-width: 96px;
+    text-align: center;
+  }
+
+  .gs-scorerow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .gs-score {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .gs-score.dim {
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+
+  .gs-dash {
+    font-size: 24px;
+    color: var(--text-muted);
+  }
+
+  .gs-status {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .gs-status.live {
+    color: #c0392b;
+  }
+
+  .gs-when {
+    font-size: 16px;
+    font-weight: 800;
+    padding-top: 6px;
+  }
+
+  .gs-sub {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* Cards inside pop-ups */
+  .gs-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+
+  .gs-card-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .gs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .gs-table th,
+  .gs-table td {
+    padding: 7px 4px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gs-table th {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+
+  .gs-table .gs-th-team {
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .gs-table .gs-total {
+    font-weight: 800;
+  }
+
+  .gs-mini-logo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .gs-stats th:not(.gs-th-team) {
+    text-align: right;
+  }
+
+  .gs-stats td:not(.gs-th-team) {
+    text-align: right;
+    width: 22%;
+  }
+
+  .gs-stats tr.main td {
+    font-weight: 700;
+    border-top: 1px solid var(--border);
+  }
+
+  .gs-stats tr.sub td {
+    color: var(--text-muted);
+    background: #f7f8fa;
+    font-size: 13px;
+  }
+
+  .gs-stats tr.sub .gs-th-team {
+    padding-left: 14px;
+  }
+
+  .gs-play {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .gs-card-title + .gs-play {
+    border-top: none;
+  }
+
+  .gs-play-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .gs-play-mid {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .gs-play-meta {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .gs-play-text {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .gs-play-score {
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .gs-leader-cat {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 0 2px;
+  }
+
+  .gs-leader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+
+  .gs-leader-name {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .gs-leader-line {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .gs-info-row {
+    display: flex;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 14px;
+  }
+
+  .gs-info-k {
+    flex: 0 0 90px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  /* Team page */
+  .ts-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 44px 0 12px;
+    border-radius: 16px;
+  }
+
+  .ts-logo {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+  }
+
+  .ts-name {
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .ts-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 6px 0 12px;
+  }
+
+  .ts-tab {
+    flex: 1;
+    padding: 10px 0;
+    font-weight: 700;
+    border-radius: 8px;
+  }
+
+  .ts-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .sch-type {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 0 4px;
+  }
+
+  .sch-row,
+  .st-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    padding: 10px 2px;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .sch-type + .sch-row {
+    border-top: none;
+  }
+
+  .sch-prefix {
+    flex: 0 0 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .sch-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .sch-opp {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sch-right {
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .sch-result {
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .sch-result.win { color: #1e8e3e; }
+  .sch-result.loss { color: #c0392b; }
+
+  .sch-live {
+    font-size: 14px;
+    font-weight: 800;
+    color: #c0392b;
+  }
+
+  .sch-date {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .sch-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .st-head {
+    border-top: none;
+    padding: 6px 2px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  .st-team {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .st-name {
+    font-size: 15px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .st-rec {
+    flex: 0 0 56px;
+    text-align: right;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .st-row.me {
+    background: #eef3fb;
+  }
+
+  .st-row.me .st-name,
+  .st-row.me .st-rec {
+    font-weight: 800;
+  }
+
   /* Hamburger menu overlay */
   .menu-overlay {
     position: fixed;
@@ -903,6 +1417,7 @@
       var homeRank = (home.curatedRank && typeof home.curatedRank.current === 'number' && home.curatedRank.current < 99) ? home.curatedRank.current : null;
 
       var situation = competition.situation || {};
+      var venueName = competition.venue && competition.venue.fullName ? competition.venue.fullName : null;
 
       return {
         eventId: event.id,
@@ -931,7 +1446,16 @@
         homeWinner: !!home.winner,
         network: network,
         sport: sport,
-        spread: spreadDetails
+        spread: spreadDetails,
+        venue: venueName,
+        awayRecord: competitorRecord(away),
+        homeRecord: competitorRecord(home),
+        awayLinescores: lineScoreValues(away.linescores),
+        homeLinescores: lineScoreValues(home.linescores),
+        awayColor: away.team.color || null,
+        homeColor: home.team.color || null,
+        awayConfId: away.team.conferenceId ? String(away.team.conferenceId) : null,
+        homeConfId: home.team.conferenceId ? String(home.team.conferenceId) : null
       };
     } catch (e) {
       return null;
@@ -1039,15 +1563,21 @@
       line2.textContent = game.displayClock || '';
       wrap.appendChild(line2);
     } else {
+      wrap.classList.add('pre');
+      var whenLine = document.createElement('div');
+      whenLine.className = 'tl-status-line tl-status-when';
+      whenLine.textContent = formatTileWhen(game);
+      wrap.appendChild(whenLine);
       if (game.sport === 'cfb' && game.spread) {
         var spreadLine = document.createElement('div');
-        spreadLine.className = 'tl-status-line';
+        spreadLine.className = 'tl-status-sub';
         spreadLine.textContent = game.spread;
         wrap.appendChild(spreadLine);
       }
       var netLine = document.createElement('div');
       netLine.className = 'tl-status-sub';
-      netLine.textContent = game.network || 'TBD';
+      netLine.textContent = game.network || '';
+      if (!game.network) netLine.style.display = 'none';
       wrap.appendChild(netLine);
     }
 
@@ -1064,7 +1594,8 @@
       starBtn.className = 'tl-star' + (marked ? ' marked' : '');
       starBtn.setAttribute('aria-label', 'Mark game as interested');
       starBtn.innerHTML = marked ? '&#9733;' : '&#9734;';
-      starBtn.addEventListener('click', function () {
+      starBtn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
         manualStar(game.eventId, !isMarked(game.eventId));
         renderTimeline();
       });
@@ -1086,12 +1617,20 @@
 
     card.appendChild(buildStatusEl(game));
 
+    if (!(game.awayTbd && game.homeTbd)) {
+      card.classList.add('tl-card-link');
+      card.setAttribute('role', 'button');
+      card.tabIndex = 0;
+      card.addEventListener('click', function () { openGameSheet(game); });
+      card.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openGameSheet(game); }
+      });
+    }
+
     return card;
   }
 
   function renderTimeline() {
-    var GAP_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
-
     timelineListEl.innerHTML = '';
 
     var games, emptyText, showStar;
@@ -1112,49 +1651,871 @@
     }
     emptyEl.style.display = 'none';
 
-    var groups = {};
-    games.forEach(function (game) {
-      var ms = new Date(game.date).getTime();
-      if (!groups[ms]) groups[ms] = [];
-      groups[ms].push(game);
+    function sortKey(game) {
+      // Games with no confirmed kickoff time carry a placeholder UTC timestamp; pin them to
+      // the start of their calendar day so they sit with that day's games instead of drifting.
+      if (game.timeTbd) return new Date(game.date.slice(0, 10) + 'T06:00:00Z').getTime();
+      return new Date(game.date).getTime();
+    }
+
+    var sorted = games.slice().sort(function (a, b) {
+      var d = sortKey(a) - sortKey(b);
+      if (d !== 0) return d;
+      return String(a.eventId).localeCompare(String(b.eventId));
     });
 
-    var sortedMs = Object.keys(groups).map(Number).sort(function (a, b) { return a - b; });
-    var prevDayKey = null;
-    var prevMsInDay = null;
-    var isFirstDay = true;
+    var grid = document.createElement('div');
+    grid.className = 'tl-grid';
+    sorted.forEach(function (game) {
+      grid.appendChild(buildTimelineCard(game, showStar));
+    });
+    timelineListEl.appendChild(grid);
+  }
 
-    sortedMs.forEach(function (ms) {
-      var repGame = groups[ms][0];
-      var dayKey = gameDayKey(repGame);
-      if (dayKey !== prevDayKey) {
-        var dayLabel = document.createElement('div');
-        dayLabel.className = 'day-label' + (isFirstDay ? '' : ' day-label-sep');
-        dayLabel.textContent = gameDayAbbrev(repGame);
-        timelineListEl.appendChild(dayLabel);
-        prevDayKey = dayKey;
-        prevMsInDay = null;
-        isFirstDay = false;
+  // ================= Pop-up pages: box score + team page =================
+  var LEAGUE_ROOTS = {
+    cfb: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football',
+    nfl: 'https://site.api.espn.com/apis/site/v2/sports/football/nfl'
+  };
+  var STANDINGS_ROOTS = {
+    cfb: 'https://site.api.espn.com/apis/v2/sports/football/college-football/standings',
+    nfl: 'https://site.api.espn.com/apis/v2/sports/football/nfl/standings'
+  };
+  var LIVE_REFRESH_MS = 30000;
+
+  var sheetStack = [];
+  var sheetZ = 200;
+
+  function fetchJson(url) {
+    return fetch(url).then(function (res) {
+      if (!res.ok) throw new Error('Request failed with status ' + res.status);
+      return res.json();
+    });
+  }
+
+  function mk(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = text;
+    return n;
+  }
+
+  function mkLogo(url, cls) {
+    var img = mk('img', cls);
+    img.alt = '';
+    if (url) {
+      img.src = url;
+      img.onerror = function () { this.style.visibility = 'hidden'; };
+    } else {
+      img.style.visibility = 'hidden';
+    }
+    return img;
+  }
+
+  function teamLogoUrl(team) {
+    if (!team) return null;
+    if (team.logo) return team.logo;
+    if (team.logos && team.logos.length) return team.logos[0].href || null;
+    return null;
+  }
+
+  function teamLabel(team, sport) {
+    if (!team) return '';
+    if (sport === 'nfl') return team.shortDisplayName || team.displayName || team.name || '';
+    return team.location || team.shortDisplayName || team.displayName || team.name || '';
+  }
+
+  function titleCase(s) {
+    s = String(s || '');
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  }
+
+  function scoreText(v) {
+    if (v === undefined || v === null) return '';
+    if (typeof v === 'object') return v.displayValue !== undefined ? String(v.displayValue) : (v.value !== undefined ? String(Math.round(v.value)) : '');
+    return String(v);
+  }
+
+  function hexToRgba(hex, alpha) {
+    if (!hex || !/^[0-9a-f]{6}$/i.test(hex)) return null;
+    var n = parseInt(hex, 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+  }
+
+  function currentSeasonYear() {
+    var d = new Date();
+    return d.getMonth() <= 5 ? d.getFullYear() - 1 : d.getFullYear();
+  }
+
+  function formatTileWhen(game) {
+    if (game.timeTbd) return titleCase(utcDayAbbrev(game.date)) + ' @ TBD';
+    var ms = new Date(game.date).getTime();
+    var day = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short' }).format(new Date(ms));
+    return day + ' @ ' + formatSlotTime(ms) + ' CT';
+  }
+
+  function competitorRecord(c) {
+    var list = c.records || c.record;
+    if (!list || !list.length) return '';
+    var pick = list[0];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].type === 'total' || list[i].name === 'overall') { pick = list[i]; break; }
+    }
+    return pick.summary || pick.displayValue || '';
+  }
+
+  function lineScoreValues(list) {
+    return (list || []).map(function (ls) {
+      if (ls.displayValue !== undefined && ls.displayValue !== null) return String(ls.displayValue);
+      return ls.value !== undefined && ls.value !== null ? String(Math.round(ls.value)) : '';
+    });
+  }
+
+  // ---- Sheet (full-screen page with an X) ----
+  function openSheet(className) {
+    var el = mk('div', 'sheet ' + (className || ''));
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.style.zIndex = String(++sheetZ);
+
+    var bar = mk('div', 'sheet-bar');
+    var closeBtn = mk('button', 'sheet-close');
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.innerHTML = '&times;';
+    bar.appendChild(closeBtn);
+    el.appendChild(bar);
+
+    var body = mk('div', 'sheet-body');
+    el.appendChild(body);
+
+    var sheet = { el: el, body: body, timer: null, closed: false };
+    sheet.close = function () {
+      if (sheet.closed) return;
+      sheet.closed = true;
+      if (sheet.timer) { clearInterval(sheet.timer); sheet.timer = null; }
+      if (el.parentNode) el.parentNode.removeChild(el);
+      var idx = sheetStack.indexOf(sheet);
+      if (idx !== -1) sheetStack.splice(idx, 1);
+      if (!sheetStack.length) document.body.classList.remove('sheet-open');
+    };
+    closeBtn.addEventListener('click', sheet.close);
+
+    document.body.appendChild(el);
+    sheetStack.push(sheet);
+    document.body.classList.add('sheet-open');
+    return sheet;
+  }
+
+  function sectionCard(title) {
+    var card = mk('div', 'gs-card');
+    if (title) card.appendChild(mk('div', 'gs-card-title', title));
+    return card;
+  }
+
+  // ---- Box score page ----
+  function openGameSheet(seed) {
+    var sheet = openSheet('game-sheet');
+    var st = { game: seed, summary: null, token: 0, loaded: false, error: false };
+    renderGameSheet(sheet, st);
+    loadGameSummary(sheet, st, false);
+  }
+
+  function loadGameSummary(sheet, st, silent) {
+    var token = ++st.token;
+    var url = LEAGUE_ROOTS[st.game.sport] + '/summary?event=' + encodeURIComponent(st.game.eventId);
+    fetchJson(url).then(function (data) {
+      if (sheet.closed || token !== st.token) return;
+      st.summary = data;
+      st.error = false;
+      st.loaded = true;
+      st.game = mergeSummaryHeader(st.game, data);
+      renderGameSheet(sheet, st);
+      syncGameTimer(sheet, st);
+    }).catch(function () {
+      if (sheet.closed || token !== st.token) return;
+      if (!silent) {
+        st.error = true;
+        st.loaded = true;
+        renderGameSheet(sheet, st);
+      }
+      syncGameTimer(sheet, st);
+    });
+  }
+
+  function syncGameTimer(sheet, st) {
+    if (st.game.state === 'in') {
+      if (!sheet.timer) {
+        sheet.timer = setInterval(function () { loadGameSummary(sheet, st, true); }, LIVE_REFRESH_MS);
+      }
+    } else if (sheet.timer) {
+      clearInterval(sheet.timer);
+      sheet.timer = null;
+    }
+  }
+
+  function mergeSummaryHeader(game, data) {
+    var comp = data && data.header && data.header.competitions && data.header.competitions[0];
+    if (!comp) return game;
+    var g = {};
+    for (var k in game) {
+      if (Object.prototype.hasOwnProperty.call(game, k)) g[k] = game[k];
+    }
+    var status = comp.status || {};
+    var type = status.type || {};
+    if (type.state) { g.state = type.state; g.isFinal = type.state === 'post'; }
+    if (typeof status.period === 'number') g.period = status.period;
+    if (status.displayClock) g.displayClock = status.displayClock;
+    (comp.competitors || []).forEach(function (c) {
+      var side = c.homeAway === 'home' ? 'home' : (c.homeAway === 'away' ? 'away' : null);
+      if (!side) return;
+      var sc = scoreText(c.score);
+      if (sc !== '') g[side + 'Score'] = sc;
+      if (c.linescores && c.linescores.length) g[side + 'Linescores'] = lineScoreValues(c.linescores);
+      if (typeof c.winner === 'boolean') g[side + 'Winner'] = c.winner;
+      var rec = competitorRecord(c);
+      if (rec) g[side + 'Record'] = rec;
+      if (c.team) {
+        if (!g[side + 'Logo']) g[side + 'Logo'] = teamLogoUrl(c.team);
+        if (!g[side + 'Color'] && c.team.color) g[side + 'Color'] = c.team.color;
+      }
+    });
+    return g;
+  }
+
+  function renderGameSheet(sheet, st) {
+    var g = st.game;
+    var body = sheet.body;
+    body.innerHTML = '';
+    body.appendChild(buildGameHeader(g));
+
+    if (!st.loaded) {
+      body.appendChild(mk('div', 'sheet-note', 'Loading box score…'));
+      return;
+    }
+    if (st.error) {
+      var errWrap = mk('div', 'sheet-note');
+      errWrap.appendChild(mk('div', null, 'Couldn’t load the box score.'));
+      var retry = mk('button', 'sheet-retry', 'Try again');
+      retry.addEventListener('click', function () {
+        st.loaded = false;
+        st.error = false;
+        renderGameSheet(sheet, st);
+        loadGameSummary(sheet, st, false);
+      });
+      errWrap.appendChild(retry);
+      body.appendChild(errWrap);
+      return;
+    }
+
+    var s = st.summary || {};
+    if (g.state !== 'pre') {
+      var ls = buildLineScore(g);
+      if (ls) body.appendChild(ls);
+      var plays = buildScoringPlays(g, s);
+      if (plays) body.appendChild(plays);
+      var stats = buildTeamStats(g, s);
+      if (stats) body.appendChild(stats);
+      var leaders = buildLeaders(g, s);
+      if (leaders) body.appendChild(leaders);
+      if (!ls && !stats && !leaders) {
+        body.appendChild(mk('div', 'sheet-note', 'Box score data isn’t available yet.'));
+      }
+    }
+    var info = buildGameInfo(g, s);
+    if (info) body.appendChild(info);
+    if (g.state === 'pre') {
+      body.appendChild(mk('div', 'sheet-note', 'The box score shows up here once the game starts.'));
+    }
+  }
+
+  function openTeamFromGame(g, side) {
+    openTeamSheet({
+      id: g[side + 'TeamId'],
+      name: g[side + 'Name'],
+      logo: g[side + 'Logo'],
+      color: g[side + 'Color'],
+      confId: g[side + 'ConfId'],
+      record: g[side + 'Record']
+    }, g.sport);
+  }
+
+  function buildHeadTeam(g, side) {
+    var tbd = g[side + 'Tbd'] || !g[side + 'TeamId'];
+    var wrap = mk(tbd ? 'div' : 'button', 'gs-team');
+    var glow = hexToRgba(g[side + 'Color'], 0.16);
+    if (glow) wrap.style.background = 'radial-gradient(circle at 50% 36%, ' + glow + ', rgba(255,255,255,0) 72%)';
+    wrap.appendChild(mkLogo(g[side + 'Logo'], 'gs-logo'));
+    var nameEl = mk('div', 'gs-name');
+    if (g[side + 'Rank']) nameEl.appendChild(mk('span', 'gs-rank', String(g[side + 'Rank'])));
+    nameEl.appendChild(document.createTextNode(g[side + 'Name'] || ''));
+    wrap.appendChild(nameEl);
+    if (g[side + 'Record']) wrap.appendChild(mk('div', 'gs-record', g[side + 'Record']));
+    if (!tbd) {
+      wrap.setAttribute('aria-label', 'Open ' + (g[side + 'Name'] || 'team') + ' schedule and standings');
+      wrap.addEventListener('click', function () { openTeamFromGame(g, side); });
+    }
+    return wrap;
+  }
+
+  function buildHeadMid(g) {
+    var mid = mk('div', 'gs-mid');
+    if (g.state === 'pre') {
+      mid.appendChild(mk('div', 'gs-when', formatTileWhen(g)));
+      if (g.network) mid.appendChild(mk('div', 'gs-sub', g.network));
+      if (g.sport === 'cfb' && g.spread) mid.appendChild(mk('div', 'gs-sub', g.spread));
+      return mid;
+    }
+    var row = mk('div', 'gs-scorerow');
+    var awayWin = g.isFinal && g.awayWinner;
+    var homeWin = g.isFinal && g.homeWinner;
+    row.appendChild(mk('span', 'gs-score' + (g.isFinal && !awayWin ? ' dim' : ''), g.awayScore !== undefined && g.awayScore !== null ? String(g.awayScore) : '0'));
+    row.appendChild(mk('span', 'gs-dash', '–'));
+    row.appendChild(mk('span', 'gs-score' + (g.isFinal && !homeWin ? ' dim' : ''), g.homeScore !== undefined && g.homeScore !== null ? String(g.homeScore) : '0'));
+    mid.appendChild(row);
+
+    if (g.isFinal) {
+      mid.appendChild(mk('div', 'gs-status', g.period && g.period > 4 ? 'Final/' + periodLabel(g.period) : 'Final'));
+    } else {
+      mid.appendChild(mk('div', 'gs-status live', periodLabel(g.period) + (g.displayClock ? ' · ' + g.displayClock : '')));
+    }
+    if (g.network) mid.appendChild(mk('div', 'gs-sub', g.network));
+    return mid;
+  }
+
+  function buildGameHeader(g) {
+    var head = mk('div', 'gs-head');
+    head.appendChild(buildHeadTeam(g, 'away'));
+    head.appendChild(buildHeadMid(g));
+    head.appendChild(buildHeadTeam(g, 'home'));
+    return head;
+  }
+
+  function buildLineScore(g) {
+    var a = g.awayLinescores || [];
+    var h = g.homeLinescores || [];
+    if (!a.length && !h.length) return null;
+    var n = Math.max(4, a.length, h.length);
+    var card = sectionCard(null);
+    var table = mk('table', 'gs-table gs-linescore');
+    var thead = mk('thead');
+    var hr = mk('tr');
+    hr.appendChild(mk('th', 'gs-th-team', ''));
+    for (var i = 1; i <= n; i++) {
+      hr.appendChild(mk('th', null, i <= 4 ? String(i) : (i === 5 ? 'OT' : (i - 4) + 'OT')));
+    }
+    hr.appendChild(mk('th', 'gs-total', 'T'));
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    var tbody = mk('tbody');
+    [['away', a], ['home', h]].forEach(function (pair) {
+      var side = pair[0];
+      var vals = pair[1];
+      var tr = mk('tr');
+      var teamCell = mk('td', 'gs-th-team');
+      teamCell.appendChild(mkLogo(g[side + 'Logo'], 'gs-mini-logo'));
+      teamCell.appendChild(mk('span', null, g[side + 'Abbr'] || ''));
+      tr.appendChild(teamCell);
+      for (var j = 0; j < n; j++) tr.appendChild(mk('td', null, vals[j] !== undefined ? vals[j] : '–'));
+      tr.appendChild(mk('td', 'gs-total', g[side + 'Score'] !== undefined && g[side + 'Score'] !== null ? String(g[side + 'Score']) : ''));
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+    return card;
+  }
+
+  function sideForTeamId(g, id) {
+    id = String(id);
+    if (id === String(g.awayTeamId)) return 'away';
+    if (id === String(g.homeTeamId)) return 'home';
+    return null;
+  }
+
+  function buildScoringPlays(g, summary) {
+    var plays = summary.scoringPlays;
+    if (!plays || !plays.length) return null;
+    var card = sectionCard('Scoring Summary');
+    plays.forEach(function (p) {
+      var row = mk('div', 'gs-play');
+      var side = p.team && p.team.id !== undefined ? sideForTeamId(g, p.team.id) : null;
+      var logo = side ? g[side + 'Logo'] : teamLogoUrl(p.team);
+      row.appendChild(mkLogo(logo, 'gs-play-logo'));
+
+      var mid = mk('div', 'gs-play-mid');
+      var periodNum = p.period && p.period.number;
+      var parts = [];
+      if (periodNum) parts.push(periodLabel(periodNum));
+      if (p.clock && p.clock.displayValue) parts.push(p.clock.displayValue);
+      var typeText = p.type && (p.type.text || p.type.abbreviation);
+      if (typeText) parts.push(typeText);
+      mid.appendChild(mk('div', 'gs-play-meta', parts.join(' · ')));
+      mid.appendChild(mk('div', 'gs-play-text', p.text || p.shortText || ''));
+      row.appendChild(mid);
+
+      row.appendChild(mk('div', 'gs-play-score', scoreText(p.awayScore) + '–' + scoreText(p.homeScore)));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  var SUB_STAT_NAMES = ['thirdDownEff', 'fourthDownEff', 'completionAttempts', 'yardsPerPass',
+    'interceptions', 'rushingAttempts', 'yardsPerRush', 'fumblesLost'];
+
+  function buildTeamStats(g, summary) {
+    var teams = summary.boxscore && summary.boxscore.teams;
+    if (!teams || teams.length < 2) return null;
+    var map = {};
+    teams.forEach(function (t) {
+      var side = t.homeAway === 'home' || t.homeAway === 'away' ? t.homeAway : (t.team ? sideForTeamId(g, t.team.id) : null);
+      if (side) map[side] = t;
+    });
+    if (!map.away || !map.home) { map.away = teams[0]; map.home = teams[1]; }
+    var aStats = map.away.statistics || [];
+    var hStats = map.home.statistics || [];
+    if (!aStats.length) return null;
+
+    var card = sectionCard('Team Stats');
+    var table = mk('table', 'gs-table gs-stats');
+    var thead = mk('thead');
+    var hr = mk('tr');
+    hr.appendChild(mk('th', 'gs-th-team', ''));
+    var ha = mk('th');
+    ha.appendChild(mkLogo(g.awayLogo, 'gs-mini-logo'));
+    var hh = mk('th');
+    hh.appendChild(mkLogo(g.homeLogo, 'gs-mini-logo'));
+    hr.appendChild(ha);
+    hr.appendChild(hh);
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    var tbody = mk('tbody');
+    aStats.forEach(function (stat, i) {
+      var other = hStats[i] && hStats[i].name === stat.name ? hStats[i] : null;
+      if (!other) {
+        for (var k = 0; k < hStats.length; k++) {
+          if (hStats[k].name === stat.name) { other = hStats[k]; break; }
+        }
+      }
+      var isSub = SUB_STAT_NAMES.indexOf(stat.name) !== -1;
+      var tr = mk('tr', isSub ? 'sub' : 'main');
+      tr.appendChild(mk('td', 'gs-th-team', stat.label || stat.name || ''));
+      tr.appendChild(mk('td', null, stat.displayValue !== undefined ? String(stat.displayValue) : ''));
+      tr.appendChild(mk('td', null, other && other.displayValue !== undefined ? String(other.displayValue) : ''));
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    card.appendChild(table);
+    return card;
+  }
+
+  var LEADER_CATS = [
+    { name: 'passing', title: 'Passing', labels: ['C/ATT', 'YDS', 'TD', 'INT'] },
+    { name: 'rushing', title: 'Rushing', labels: ['CAR', 'YDS', 'TD', 'LONG'] },
+    { name: 'receiving', title: 'Receiving', labels: ['REC', 'YDS', 'TD', 'LONG'] }
+  ];
+
+  function pickTopAthlete(cat) {
+    var athletes = cat.athletes || [];
+    if (!athletes.length) return null;
+    var labels = cat.labels || [];
+    var idx = labels.indexOf('YDS');
+    if (idx === -1) return athletes[0];
+    var best = athletes[0];
+    var bestVal = -Infinity;
+    athletes.forEach(function (a) {
+      var v = parseInt(String((a.stats || [])[idx] || '').replace(/,/g, ''), 10);
+      if (!isNaN(v) && v > bestVal) { bestVal = v; best = a; }
+    });
+    return best;
+  }
+
+  function buildLeaders(g, summary) {
+    var players = summary.boxscore && summary.boxscore.players;
+    if (!players || !players.length) return null;
+    var card = sectionCard('Top Performers');
+    var any = false;
+    LEADER_CATS.forEach(function (lc) {
+      var rows = [];
+      players.forEach(function (tp) {
+        var side = tp.team ? sideForTeamId(g, tp.team.id) : null;
+        var cat = null;
+        (tp.statistics || []).forEach(function (s) { if (s.name === lc.name) cat = s; });
+        if (!cat) return;
+        var top = pickTopAthlete(cat);
+        if (!top || !top.athlete) return;
+        var parts = [];
+        lc.labels.forEach(function (label) {
+          var li = (cat.labels || []).indexOf(label);
+          if (li !== -1 && top.stats && top.stats[li] !== undefined) parts.push(top.stats[li] + ' ' + label);
+        });
+        rows.push({ side: side, name: top.athlete.displayName || top.athlete.shortName || '', line: parts.join(', '), team: tp.team });
+      });
+      if (!rows.length) return;
+      any = true;
+      card.appendChild(mk('div', 'gs-leader-cat', lc.title));
+      rows.forEach(function (r) {
+        var row = mk('div', 'gs-leader');
+        row.appendChild(mkLogo(r.side ? g[r.side + 'Logo'] : teamLogoUrl(r.team), 'gs-play-logo'));
+        var txt = mk('div', 'gs-leader-text');
+        txt.appendChild(mk('div', 'gs-leader-name', r.name));
+        txt.appendChild(mk('div', 'gs-leader-line', r.line));
+        row.appendChild(txt);
+        card.appendChild(row);
+      });
+    });
+    return any ? card : null;
+  }
+
+  function buildGameInfo(g, summary) {
+    var rows = [];
+    var gi = summary && summary.gameInfo;
+    var venue = gi && gi.venue;
+    var venueName = venue && (venue.fullName || venue.name);
+    if (!venueName && g.venue) venueName = g.venue;
+    if (venueName) {
+      var loc = venue && venue.address ? [venue.address.city, venue.address.state].filter(Boolean).join(', ') : '';
+      rows.push(['Venue', venueName + (loc ? ' – ' + loc : '')]);
+    }
+    if (g.network) rows.push(['TV', g.network]);
+    if (g.sport === 'cfb' && g.spread && !g.isFinal) rows.push(['Line', g.spread]);
+    if (gi && gi.attendance && g.isFinal) rows.push(['Attendance', Number(gi.attendance).toLocaleString('en-US')]);
+    if (!rows.length) return null;
+    var card = sectionCard('Game Info');
+    rows.forEach(function (r) {
+      var row = mk('div', 'gs-info-row');
+      row.appendChild(mk('div', 'gs-info-k', r[0]));
+      row.appendChild(mk('div', 'gs-info-v', r[1]));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  // ---- Team page (schedule + standings) ----
+  function openTeamSheet(team, sport) {
+    var sheet = openSheet('team-sheet');
+    var st = { team: team, sport: sport, tab: 'schedule', schedulePromise: null, standingsPromise: null, season: null };
+
+    var head = mk('div', 'ts-head');
+    var glow = hexToRgba(team.color, 0.16);
+    if (glow) head.style.background = 'radial-gradient(circle at 50% 40%, ' + glow + ', rgba(255,255,255,0) 72%)';
+    head.appendChild(mkLogo(team.logo, 'ts-logo'));
+    head.appendChild(mk('div', 'ts-name', team.name || ''));
+    if (team.record) head.appendChild(mk('div', 'gs-record', team.record));
+    sheet.body.appendChild(head);
+
+    var tabs = mk('div', 'ts-tabs');
+    var tabBtns = {};
+    [['schedule', 'Schedule'], ['standings', 'Standings']].forEach(function (t) {
+      var b = mk('button', 'ts-tab', t[1]);
+      b.addEventListener('click', function () { showTab(t[0]); });
+      tabBtns[t[0]] = b;
+      tabs.appendChild(b);
+    });
+    sheet.body.appendChild(tabs);
+
+    var content = mk('div', 'ts-content');
+    sheet.body.appendChild(content);
+
+    function showTab(name) {
+      st.tab = name;
+      Object.keys(tabBtns).forEach(function (k) { tabBtns[k].classList.toggle('active', k === name); });
+      content.innerHTML = '';
+      if (name === 'schedule') renderScheduleTab(sheet, st, content);
+      else renderStandingsTab(sheet, st, content);
+    }
+    showTab('schedule');
+  }
+
+  function loadSchedule(st) {
+    if (!st.schedulePromise) {
+      st.schedulePromise = fetchJson(LEAGUE_ROOTS[st.sport] + '/teams/' + encodeURIComponent(st.team.id) + '/schedule')
+        .then(function (data) {
+          if (data && data.season && data.season.year) st.season = data.season.year;
+          return data;
+        });
+      st.schedulePromise.catch(function () { st.schedulePromise = null; });
+    }
+    return st.schedulePromise;
+  }
+
+  function renderScheduleTab(sheet, st, content) {
+    content.appendChild(mk('div', 'sheet-note', 'Loading schedule…'));
+    loadSchedule(st).then(function (data) {
+      if (sheet.closed || st.tab !== 'schedule') return;
+      content.innerHTML = '';
+      var events = (data && data.events) || [];
+      if (!events.length) {
+        content.appendChild(mk('div', 'sheet-note', 'No schedule available.'));
+        return;
+      }
+      var year = (data.season && data.season.year) || st.season;
+      var card = mk('div', 'gs-card sch-card');
+      card.appendChild(mk('div', 'gs-card-title', (year ? year + ' ' : '') + 'Schedule'));
+      var lastType = null;
+      events.forEach(function (ev) {
+        var row = buildScheduleRow(ev, st);
+        if (!row) return;
+        var typeName = ev.seasonType && ev.seasonType.name;
+        if (typeName && typeName !== lastType) {
+          card.appendChild(mk('div', 'sch-type', typeName));
+          lastType = typeName;
+        }
+        card.appendChild(row);
+      });
+      content.appendChild(card);
+    }).catch(function () {
+      if (sheet.closed || st.tab !== 'schedule') return;
+      content.innerHTML = '';
+      var wrap = mk('div', 'sheet-note');
+      wrap.appendChild(mk('div', null, 'Couldn’t load the schedule.'));
+      var retry = mk('button', 'sheet-retry', 'Try again');
+      retry.addEventListener('click', function () { content.innerHTML = ''; renderScheduleTab(sheet, st, content); });
+      wrap.appendChild(retry);
+      content.appendChild(wrap);
+    });
+  }
+
+  function broadcastName(comp) {
+    var list = comp.broadcasts || comp.geoBroadcasts || [];
+    var best = '';
+    for (var i = 0; i < list.length; i++) {
+      var b = list[i];
+      var name = (b.media && b.media.shortName) || (b.names && b.names[0]) || (b.media && b.media.name) || '';
+      var isTv = b.type && (b.type.shortName === 'TV' || b.type.id === '1');
+      if (name && (isTv || !best)) best = name;
+      if (name && isTv) break;
+    }
+    return best;
+  }
+
+  function seedFromScheduleEvent(ev, sport) {
+    var comp = ev.competitions && ev.competitions[0];
+    if (!comp) return null;
+    var away = null, home = null;
+    (comp.competitors || []).forEach(function (c) {
+      if (c.homeAway === 'away') away = c;
+      if (c.homeAway === 'home') home = c;
+    });
+    if (!away || !home) return null;
+    var type = (comp.status && comp.status.type) || {};
+    var game = {
+      eventId: ev.id,
+      date: ev.date,
+      state: type.state || 'pre',
+      isFinal: type.state === 'post',
+      period: comp.status && typeof comp.status.period === 'number' ? comp.status.period : null,
+      displayClock: comp.status && comp.status.displayClock || null,
+      possession: null,
+      timeTbd: comp.timeValid === false,
+      network: broadcastName(comp) || null,
+      sport: sport,
+      spread: null
+    };
+    [['away', away], ['home', home]].forEach(function (pair) {
+      var side = pair[0];
+      var c = pair[1];
+      var t = c.team || {};
+      game[side + 'Tbd'] = false;
+      game[side + 'TeamId'] = String(t.id);
+      game[side + 'Rank'] = null;
+      game[side + 'Name'] = t.displayName || t.name || '';
+      game[side + 'Abbr'] = t.abbreviation || '';
+      game[side + 'Logo'] = teamLogoUrl(t);
+      game[side + 'Score'] = scoreText(c.score);
+      game[side + 'Winner'] = !!c.winner;
+      game[side + 'Color'] = t.color || null;
+      game[side + 'ConfId'] = t.conferenceId || null;
+      game[side + 'Record'] = competitorRecord(c);
+      game[side + 'Linescores'] = [];
+    });
+    return game;
+  }
+
+  function buildScheduleRow(ev, st) {
+    var comp = ev.competitions && ev.competitions[0];
+    if (!comp || !comp.competitors) return null;
+    var me = null, opp = null;
+    comp.competitors.forEach(function (c) {
+      if (c.team && String(c.team.id) === String(st.team.id)) me = c; else opp = c;
+    });
+    if (!me || !opp || !opp.team) return null;
+
+    var type = (comp.status && comp.status.type) || {};
+    var state = type.state || 'pre';
+    var row = mk('button', 'sch-row');
+    var atHome = me.homeAway === 'home' || comp.neutralSite;
+    row.appendChild(mk('span', 'sch-prefix', atHome ? 'vs' : '@'));
+    row.appendChild(mkLogo(teamLogoUrl(opp.team), 'sch-logo'));
+    row.appendChild(mk('span', 'sch-opp', teamLabel(opp.team, st.sport)));
+
+    var right = mk('div', 'sch-right');
+    if (state === 'post') {
+      var mine = parseInt(scoreText(me.score), 10);
+      var theirs = parseInt(scoreText(opp.score), 10);
+      var won = me.winner === true;
+      var lost = opp.winner === true;
+      var letter = won ? 'W' : (lost ? 'L' : 'T');
+      var hi = Math.max(mine, theirs);
+      var lo = Math.min(mine, theirs);
+      var res = mk('div', 'sch-result ' + (won ? 'win' : (lost ? 'loss' : '')));
+      res.textContent = letter + ' ' + (isNaN(hi) ? '' : hi + '-' + lo);
+      right.appendChild(res);
+    } else if (state === 'in') {
+      right.appendChild(mk('div', 'sch-live', 'LIVE!'));
+      var net = broadcastName(comp);
+      if (net) right.appendChild(mk('div', 'sch-sub', net));
+    } else {
+      var tbd = comp.timeValid === false;
+      var dateKey = tbd ? String(ev.date).slice(0, 10) : ctDateKey(new Date(ev.date).getTime());
+      var bits = dateKey.split('-');
+      right.appendChild(mk('div', 'sch-date', parseInt(bits[1], 10) + '/' + parseInt(bits[2], 10)));
+      var when = tbd ? 'TBD' : formatSlotTime(new Date(ev.date).getTime()) + ' CT';
+      var net2 = broadcastName(comp);
+      right.appendChild(mk('div', 'sch-sub', when + (net2 ? ' · ' + net2 : '')));
+    }
+    if (type.name && /POSTPONED|CANCELED|CANCELLED/i.test(type.name)) {
+      right.innerHTML = '';
+      right.appendChild(mk('div', 'sch-sub', type.description || 'Postponed'));
+    }
+    row.appendChild(right);
+
+    var seed = seedFromScheduleEvent(ev, st.sport);
+    if (seed) row.addEventListener('click', function () { openGameSheet(seed); });
+    return row;
+  }
+
+  // ---- Standings tab ----
+  function resolveGroupId(st) {
+    if (st.sport === 'nfl') return Promise.resolve(null);
+    if (st.team.confId) return Promise.resolve(String(st.team.confId));
+    return fetchJson(LEAGUE_ROOTS.cfb + '/teams/' + encodeURIComponent(st.team.id)).then(function (d) {
+      var g = d && d.team && d.team.groups;
+      if (!g) return null;
+      if (g.isConference === false && g.parent && g.parent.id) return String(g.parent.id);
+      return g.id ? String(g.id) : null;
+    });
+  }
+
+  function collectStandingGroups(node, out) {
+    if (!node) return out;
+    if (node.standings && node.standings.entries) out.push({ name: node.name || '', entries: node.standings.entries });
+    (node.children || []).forEach(function (c) { collectStandingGroups(c, out); });
+    return out;
+  }
+
+  function statDisplay(entry, test) {
+    var stats = entry.stats || [];
+    for (var i = 0; i < stats.length; i++) {
+      if (test(stats[i])) return stats[i].displayValue || stats[i].summary || '';
+    }
+    return '';
+  }
+
+  function parseRecord(s) {
+    var m = String(s || '').match(/^(\d+)-(\d+)(?:-(\d+))?/);
+    if (!m) return { w: 0, l: 0, t: 0, pct: 0 };
+    var w = +m[1], l = +m[2], t = m[3] ? +m[3] : 0;
+    var games = w + l + t;
+    return { w: w, l: l, t: t, pct: games ? (w + t / 2) / games : 0 };
+  }
+
+  function loadStandings(st) {
+    if (!st.standingsPromise) {
+      var seasonWait = loadSchedule(st).catch(function () { return null; });
+      st.standingsPromise = Promise.all([resolveGroupId(st), seasonWait]).then(function (res) {
+        var gid = res[0];
+        st.groupId = gid;
+        var season = st.season || currentSeasonYear();
+        var url = STANDINGS_ROOTS[st.sport] + (st.sport === 'nfl'
+          ? '?level=3&season=' + season
+          : '?group=' + encodeURIComponent(gid || '') + '&season=' + season);
+        if (st.sport === 'cfb' && !gid) throw new Error('No conference');
+        return fetchJson(url);
+      });
+      st.standingsPromise.catch(function () { st.standingsPromise = null; });
+    }
+    return st.standingsPromise;
+  }
+
+  function renderStandingsTab(sheet, st, content) {
+    content.appendChild(mk('div', 'sheet-note', 'Loading standings…'));
+    loadStandings(st).then(function (data) {
+      if (sheet.closed || st.tab !== 'standings') return;
+      content.innerHTML = '';
+      var groups = collectStandingGroups(data, []);
+      var mine = null;
+      groups.forEach(function (gr) {
+        gr.entries.forEach(function (e) {
+          if (e.team && String(e.team.id) === String(st.team.id)) mine = gr;
+        });
+      });
+      if (!mine && st.sport === 'cfb' && groups.length === 1) mine = groups[0];
+      if (!mine || !mine.entries.length) {
+        content.appendChild(mk('div', 'sheet-note', 'Standings aren’t available for this team.'));
+        return;
       }
 
-      var slot = document.createElement('div');
-      slot.className = 'timeline-slot' + (prevMsInDay !== null && (ms - prevMsInDay) >= GAP_THRESHOLD_MS ? ' timeline-slot-gap' : '');
-      prevMsInDay = ms;
-
-      var timeEl = document.createElement('div');
-      timeEl.className = 'timeline-time';
-      timeEl.textContent = repGame.timeTbd ? 'TBA' : formatSlotTime(ms);
-      slot.appendChild(timeEl);
-
-      var gamesWrap = document.createElement('div');
-      gamesWrap.className = 'timeline-games';
-
-      groups[ms].forEach(function (game) {
-        gamesWrap.appendChild(buildTimelineCard(game, showStar));
+      var rows = mine.entries.map(function (e) {
+        var conf = statDisplay(e, function (s) { return s.type === 'vsconf' || s.type === 'vsdiv' || /^vs\.?\s*(conf|div)/i.test(s.name || ''); });
+        var overall = statDisplay(e, function (s) { return s.name === 'overall' || s.type === 'total'; });
+        return { e: e, conf: conf, overall: overall, c: parseRecord(conf), o: parseRecord(overall) };
+      });
+      rows.sort(function (x, y) {
+        if (st.sport === 'nfl') {
+          if (y.o.pct !== x.o.pct) return y.o.pct - x.o.pct;
+          if (y.c.pct !== x.c.pct) return y.c.pct - x.c.pct;
+        } else {
+          if (y.c.pct !== x.c.pct) return y.c.pct - x.c.pct;
+          if (y.c.w !== x.c.w) return y.c.w - x.c.w;
+          if (y.o.pct !== x.o.pct) return y.o.pct - x.o.pct;
+          if (y.o.w !== x.o.w) return y.o.w - x.o.w;
+        }
+        return teamLabel(x.e.team, st.sport).localeCompare(teamLabel(y.e.team, st.sport));
       });
 
-      slot.appendChild(gamesWrap);
-      timelineListEl.appendChild(slot);
+      var card = mk('div', 'gs-card');
+      var title = (mine.name || (st.sport === 'nfl' ? 'Division' : 'Conference')) + ' Standings';
+      card.appendChild(mk('div', 'gs-card-title', title));
+      var head = mk('div', 'st-row st-head');
+      head.appendChild(mk('span', 'st-team', 'TEAM'));
+      head.appendChild(mk('span', 'st-rec', st.sport === 'nfl' ? 'DIV' : 'CONF'));
+      head.appendChild(mk('span', 'st-rec', 'OVR'));
+      card.appendChild(head);
+
+      rows.forEach(function (r) {
+        var isMe = String(r.e.team.id) === String(st.team.id);
+        var row = mk('button', 'st-row' + (isMe ? ' me' : ''));
+        var teamCell = mk('span', 'st-team');
+        teamCell.appendChild(mkLogo(teamLogoUrl(r.e.team), 'sch-logo'));
+        teamCell.appendChild(mk('span', 'st-name', teamLabel(r.e.team, st.sport)));
+        row.appendChild(teamCell);
+        row.appendChild(mk('span', 'st-rec', r.conf || '–'));
+        row.appendChild(mk('span', 'st-rec', r.overall || '–'));
+        if (!isMe) {
+          row.addEventListener('click', function () {
+            openTeamSheet({
+              id: String(r.e.team.id),
+              name: r.e.team.displayName || teamLabel(r.e.team, st.sport),
+              logo: teamLogoUrl(r.e.team),
+              color: r.e.team.color,
+              confId: st.sport === 'cfb' ? (st.groupId || st.team.confId) : null,
+              record: r.overall
+            }, st.sport);
+          });
+        }
+        card.appendChild(row);
+      });
+      content.appendChild(card);
+    }).catch(function () {
+      if (sheet.closed || st.tab !== 'standings') return;
+      content.innerHTML = '';
+      var wrap = mk('div', 'sheet-note');
+      wrap.appendChild(mk('div', null, 'Couldn’t load the standings.'));
+      var retry = mk('button', 'sheet-retry', 'Try again');
+      retry.addEventListener('click', function () { content.innerHTML = ''; renderStandingsTab(sheet, st, content); });
+      wrap.appendChild(retry);
+      content.appendChild(wrap);
     });
   }
 
