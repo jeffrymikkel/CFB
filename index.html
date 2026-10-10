@@ -98,6 +98,13 @@
 
   #nav-refresh {
     margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 116px;
+    padding: 7px 16px;
+    letter-spacing: 0.04em;
   }
 
   .refresh-icon {
@@ -473,6 +480,44 @@
     padding-top: calc(8px + env(safe-area-inset-top));
     height: 0;
     overflow: visible;
+  }
+
+  .sheet-bar {
+    gap: 8px;
+  }
+
+  .sheet-refresh {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    color: var(--text);
+  }
+
+  .sheet-refresh:disabled {
+    opacity: 1;
+    cursor: default;
+  }
+
+  .sheet-refresh.spinning .refresh-icon {
+    animation: spin 0.7s linear infinite;
+  }
+
+  .sheet-refresh.success {
+    color: #1a8f3c;
+    border-color: #1a8f3c;
+  }
+
+  .sheet-refresh.error {
+    color: #b3261e;
+    border-color: #b3261e;
   }
 
   .sheet-close {
@@ -1211,7 +1256,7 @@
   <nav id="top-nav">
     <button id="nav-cfb" class="nav-btn active">CFB</button>
     <button id="nav-nfl" class="nav-btn">NFL</button>
-    <button id="nav-refresh" class="nav-btn" aria-label="Refresh scores"><span id="refresh-icon" class="refresh-icon">&#10227;</span></button>
+    <button id="nav-refresh" class="nav-btn" aria-label="Refresh scores"><span id="refresh-icon" class="refresh-icon">&#10227;</span><span class="refresh-label">REFRESH</span></button>
     <button id="nav-menu" class="nav-btn">&#9776;</button>
   </nav>
   <div id="sub-nav">
@@ -1867,13 +1912,21 @@
   }
 
   // ---- Sheet (full-screen page with an X) ----
-  function openSheet(className) {
+  function openSheet(className, withRefresh) {
     var el = mk('div', 'sheet ' + (className || ''));
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
     el.style.zIndex = String(++sheetZ);
 
     var bar = mk('div', 'sheet-bar');
+    var refreshBtn = null;
+    if (withRefresh) {
+      refreshBtn = mk('button', 'sheet-refresh');
+      refreshBtn.setAttribute('aria-label', 'Refresh box score');
+      refreshBtn.appendChild(mk('span', 'refresh-icon', '\u27f3'));
+      refreshBtn.appendChild(mk('span', null, 'REFRESH'));
+      bar.appendChild(refreshBtn);
+    }
     var closeBtn = mk('button', 'sheet-close');
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.innerHTML = '&times;';
@@ -1883,7 +1936,7 @@
     var body = mk('div', 'sheet-body');
     el.appendChild(body);
 
-    var sheet = { el: el, body: body, timer: null, closed: false };
+    var sheet = { el: el, body: body, timer: null, closed: false, refreshBtn: refreshBtn };
     sheet.close = function () {
       if (sheet.closed) return;
       sheet.closed = true;
@@ -1909,8 +1962,9 @@
 
   // ---- Box score page ----
   function openGameSheet(seed) {
-    var sheet = openSheet('game-sheet');
+    var sheet = openSheet('game-sheet', true);
     var st = { game: seed, summary: null, token: 0, loaded: false, error: false };
+    sheet.refreshBtn.addEventListener('click', function () { manualRefreshGame(sheet, st); });
     renderGameSheet(sheet, st);
     loadGameSummary(sheet, st, false);
   }
@@ -1918,22 +1972,45 @@
   function loadGameSummary(sheet, st, silent) {
     var token = ++st.token;
     var url = LEAGUE_ROOTS[st.game.sport] + '/summary?event=' + encodeURIComponent(st.game.eventId);
-    fetchJson(url).then(function (data) {
-      if (sheet.closed || token !== st.token) return;
+    return fetchJson(freshUrl(url)).then(function (data) {
+      if (sheet.closed || token !== st.token) return true;
       st.summary = data;
       st.error = false;
       st.loaded = true;
       st.game = mergeSummaryHeader(st.game, data);
       renderGameSheet(sheet, st);
       syncGameTimer(sheet, st);
+      return true;
     }).catch(function () {
-      if (sheet.closed || token !== st.token) return;
+      if (sheet.closed || token !== st.token) return true;
       if (!silent) {
         st.error = true;
         st.loaded = true;
         renderGameSheet(sheet, st);
       }
       syncGameTimer(sheet, st);
+      return false;
+    });
+  }
+
+  function setSheetRefreshState(btn, state, icon) {
+    btn.className = 'sheet-refresh' + (state ? ' ' + state : '');
+    btn.querySelector('.refresh-icon').textContent = icon;
+  }
+
+  function manualRefreshGame(sheet, st) {
+    var btn = sheet.refreshBtn;
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    setSheetRefreshState(btn, 'spinning', '\u27f3');
+    loadGameSummary(sheet, st, true).then(function (ok) {
+      if (sheet.closed) return;
+      setSheetRefreshState(btn, ok ? 'success' : 'error', ok ? '\u2713' : '!');
+      setTimeout(function () {
+        if (sheet.closed) return;
+        setSheetRefreshState(btn, '', '\u27f3');
+        btn.disabled = false;
+      }, 900);
     });
   }
 
@@ -1980,6 +2057,7 @@
   function renderGameSheet(sheet, st) {
     var g = st.game;
     var body = sheet.body;
+    if (sheet.refreshBtn) sheet.refreshBtn.style.display = g.state === 'in' ? '' : 'none';
     body.innerHTML = '';
     body.appendChild(buildGameHeader(g));
 
@@ -2765,6 +2843,14 @@
     return url;
   }
 
+  // ESPN's feed is cached for ~10 seconds (Cache-Control max-age), and browsers honor that, so a
+  // quick second tap on Refresh would get the same stored response. A throwaway query param
+  // makes every refresh a brand-new URL. (Deliberately not using cache:'no-store', which adds
+  // request headers that trigger a CORS preflight.)
+  function freshUrl(url) {
+    return url + (url.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now();
+  }
+
   function showContentLoading() {
     setStatus('<span class="spinner"></span>Loading games...', false);
     timelineListEl.innerHTML = '';
@@ -2783,7 +2869,7 @@
   }
 
   function loadCfbGames(tab) {
-    return fetch(buildScoreboardUrl('cfb', tab))
+    return fetch(freshUrl(buildScoreboardUrl('cfb', tab)))
       .then(function (res) {
         if (!res.ok) throw new Error('Request failed with status ' + res.status);
         return res.json();
@@ -2798,7 +2884,7 @@
   }
 
   function loadNflGames(tab) {
-    return fetch(buildScoreboardUrl('nfl', tab))
+    return fetch(freshUrl(buildScoreboardUrl('nfl', tab)))
       .then(function (res) {
         if (!res.ok) throw new Error('Request failed with status ' + res.status);
         return res.json();
